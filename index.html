@@ -9,7 +9,7 @@
 		<style>
 			@import url('https://fonts.googleapis.com/css2?family=Roboto+Mono&display=swap');
 		</style>
-		<noscript><style>body{opacity:1;animation:none}.page-footer{opacity:1}</style></noscript>
+		<noscript><style>body{opacity:1;animation:none}.social-icons a{opacity:1}</style></noscript>
 	</head>
 	<body>
 		<div class="zoom-wrap">
@@ -206,12 +206,28 @@
 		left: 0;
 		right: 0;
 		user-select: none;
+	}
+
+	.social-icons a {
 		opacity: 0;
 	}
 
-	.page-footer.shown {
+	.page-footer.shown .social-icons a {
 		opacity: 1;
 		transition: opacity 1s cubic-bezier(0.16, 1, 0.3, 1);
+		transition-delay: 90ms;
+	}
+
+	.page-footer.shown .social-icons a:nth-child(2) {
+		transition-delay: 180ms;
+	}
+
+	.page-footer.shown .social-icons a:nth-child(3) {
+		transition-delay: 270ms;
+	}
+
+	.page-footer.shown .social-icons a:nth-child(4) {
+		transition-delay: 360ms;
 	}
 	
         .social-icons {
