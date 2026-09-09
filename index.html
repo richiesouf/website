@@ -155,6 +155,35 @@
 		width: calc(100vh * 0.5);
 	}
 
+	.image-logo path {
+		stroke-linecap: round;
+		stroke-linejoin: round;
+	}
+
+	.image-logo.drawing path {
+		fill: transparent;
+		stroke: #fff;
+		stroke-width: 1.25px;
+		vector-effect: non-scaling-stroke;
+		stroke-dasharray: var(--length);
+		stroke-dashoffset: var(--length);
+		animation-name: draw;
+		animation-timing-function: cubic-bezier(0.65, 0, 0.35, 1);
+		animation-fill-mode: forwards;
+	}
+
+	@keyframes draw {
+		to {
+			stroke-dashoffset: 0;
+		}
+	}
+
+	.image-logo.drawn path {
+		fill: #fff;
+		stroke-opacity: 0;
+		transition: fill 0.9s ease-out, stroke-opacity 0.9s ease-out;
+	}
+
 	.page-footer {
 		font-family: 'Roboto Mono', monospace !important;
 		position: fixed;
@@ -212,8 +241,10 @@
 </style>
 <script>
 	const logos = document.querySelectorAll('.image-logo');
+	let logo;
+
 	window.onload = () => {
-		generateRandomPicture(logos);
+		logo = generateRandomPicture(logos);
 		if (document.hidden) {
 			document.addEventListener('visibilitychange', function onShow() {
 				if (!document.hidden) {
@@ -230,10 +261,37 @@
 		if (parseFloat(getComputedStyle(document.body).opacity) < 1) {
 			document.body.classList.add('fade-in');
 		}
+		drawLogo();
+	}
+
+	function drawLogo() {
+		if (!logo || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+			return;
+		}
+
+		const start = 500;
+		const stagger = 55;
+		const duration = 1400;
+		const glyphs = [...logo.querySelectorAll('path')].map(path => {
+			const box = path.getBBox();
+			return { path: path, x: box.x, y: box.y + box.height / 2, height: box.height };
+		});
+		const tolerance = glyphs.reduce((total, glyph) => total + glyph.height, 0) / glyphs.length / 2;
+
+		glyphs.sort((a, b) => Math.abs(a.y - b.y) > tolerance ? a.y - b.y : a.x - b.x);
+		glyphs.forEach((glyph, index) => {
+			glyph.path.style.setProperty('--length', glyph.path.getTotalLength());
+			glyph.path.style.animationDuration = duration + 'ms';
+			glyph.path.style.animationDelay = (start + index * stagger) + 'ms';
+		});
+
+		logo.classList.add('drawing');
+		setTimeout(() => logo.classList.add('drawn'), start + (glyphs.length - 1) * stagger + duration);
 	}
 
 	function generateRandomPicture(array) {
 		let randomNum = Math.floor(Math.random() * logos.length);
 		logos[randomNum].style.display = "block";
+		return logos[randomNum];
 	}
 </script>
