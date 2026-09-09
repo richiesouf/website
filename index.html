@@ -308,7 +308,7 @@
 		const stagger = 60;
 		const duration = 2000;
 		const fade = 600;
-		const fillAt = 2100;
+		const lead = 250;
 		const glyphs = [...logo.querySelectorAll('path')].map(path => {
 			const box = path.getBBox();
 			return { path: path, x: box.x, y: box.y + box.height / 2, height: box.height };
@@ -324,8 +324,10 @@
 			glyph.path.style.animationDelay = delay + 'ms, ' + delay + 'ms';
 		});
 
+		const outlineEnd = start + (glyphs.length - 1) * stagger + duration;
+
 		logo.classList.add('drawing');
-		setTimeout(() => logo.classList.add('drawn'), fillAt);
+		setTimeout(() => logo.classList.add('drawn'), outlineEnd - lead);
 	}
 
 	function generateRandomPicture(array) {
