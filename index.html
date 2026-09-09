@@ -9,7 +9,7 @@
 		<style>
 			@import url('https://fonts.googleapis.com/css2?family=Roboto+Mono&display=swap');
 		</style>
-		<noscript><style>body{opacity:1;animation:none}</style></noscript>
+		<noscript><style>body{opacity:1;animation:none}.page-footer{opacity:1}</style></noscript>
 	</head>
 	<body>
 		<div class="zoom-wrap">
@@ -206,6 +206,12 @@
 		left: 0;
 		right: 0;
 		user-select: none;
+		opacity: 0;
+	}
+
+	.page-footer.shown {
+		opacity: 1;
+		transition: opacity 1s cubic-bezier(0.16, 1, 0.3, 1);
 	}
 	
         .social-icons {
@@ -268,6 +274,7 @@
 <script>
 	const zoom = document.querySelector('.zoom-wrap');
 	const logos = document.querySelectorAll('.image-logo');
+	const footer = document.querySelector('.page-footer');
 	let logo;
 
 	sizeCanvas();
@@ -301,6 +308,7 @@
 
 	function drawLogo() {
 		if (!logo || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+			footer.classList.add('shown');
 			return;
 		}
 
@@ -327,7 +335,12 @@
 		const outlineEnd = start + (glyphs.length - 1) * stagger + duration;
 
 		logo.classList.add('drawing');
-		setTimeout(() => logo.classList.add('drawn'), outlineEnd - lead);
+		setTimeout(fill, outlineEnd - lead);
+	}
+
+	function fill() {
+		logo.classList.add('drawn');
+		footer.classList.add('shown');
 	}
 
 	function generateRandomPicture(array) {
