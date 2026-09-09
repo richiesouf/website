@@ -9,8 +9,9 @@
 		<style>
 			@import url('https://fonts.googleapis.com/css2?family=Roboto+Mono&display=swap');
 		</style>
+		<noscript><style>body{opacity:1;animation:none}</style></noscript>
 	</head>
-	<body class="fade-in">
+	<body>
 		<div class="page-container">
 			<div class="image-container">
 				<svg id="logo1" class="image-logo image-logo1" xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 390 380"> 
@@ -99,8 +100,13 @@
 	</body>
 </html>
 <style scoped>
-	.fade-in {
-		animation: fadeIn 2s;
+	body {
+		opacity: 0;
+		animation: reveal 0s linear 9s forwards;
+	}
+
+	body.fade-in {
+		animation: fadeIn 1s cubic-bezier(0.16, 1, 0.3, 1) 0.5s both;
 	}
 
 	@keyframes fadeIn {
@@ -108,6 +114,12 @@
 			opacity: 0;
 		}
 
+		to {
+			opacity: 1;
+		}
+	}
+
+	@keyframes reveal {
 		to {
 			opacity: 1;
 		}
@@ -188,10 +200,35 @@
 			width: calc(100vh * 0.3);
 		}
 	}
+
+	@media (prefers-reduced-motion: reduce) {
+		body.fade-in {
+			animation-duration: 0.01ms;
+			animation-delay: 0ms;
+		}
+	}
 </style>
 <script>
 	const logos = document.querySelectorAll('.image-logo');
-	window.onload = () => generateRandomPicture(logos);
+	window.onload = () => {
+		generateRandomPicture(logos);
+		if (document.hidden) {
+			document.addEventListener('visibilitychange', function onShow() {
+				if (!document.hidden) {
+					document.removeEventListener('visibilitychange', onShow);
+					startFade();
+				}
+			});
+		} else {
+			startFade();
+		}
+	};
+
+	function startFade() {
+		if (parseFloat(getComputedStyle(document.body).opacity) < 1) {
+			document.body.classList.add('fade-in');
+		}
+	}
 
 	function generateRandomPicture(array) {
 		let randomNum = Math.floor(Math.random() * logos.length);
