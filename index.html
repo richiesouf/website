@@ -308,7 +308,7 @@
 		const stagger = 60;
 		const duration = 2000;
 		const fade = 600;
-		const overlap = 800;
+		const fillAt = 1000;
 		const glyphs = [...logo.querySelectorAll('path')].map(path => {
 			const box = path.getBBox();
 			return { path: path, x: box.x, y: box.y + box.height / 2, height: box.height };
@@ -325,7 +325,7 @@
 		});
 
 		logo.classList.add('drawing');
-		setTimeout(() => logo.classList.add('drawn'), start + (glyphs.length - 1) * stagger + duration - overlap);
+		setTimeout(() => logo.classList.add('drawn'), fillAt);
 	}
 
 	function generateRandomPicture(array) {
