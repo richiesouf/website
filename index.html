@@ -198,12 +198,6 @@
 		transition: fill 1s cubic-bezier(0.16, 1, 0.3, 1), stroke-opacity 1s cubic-bezier(0.16, 1, 0.3, 1);
 	}
 
-	.image-container,
-	.page-footer,
-	.social-icons a {
-		will-change: transform;
-	}
-
 	.page-footer {
 		font-family: 'Roboto Mono', monospace !important;
 		position: absolute;
@@ -274,60 +268,14 @@
 <script>
 	const zoom = document.querySelector('.zoom-wrap');
 	const logos = document.querySelectorAll('.image-logo');
-	const layers = [
-		{ element: document.querySelector('.image-container'), depth: 30 },
-		{ element: document.querySelector('.page-footer'), depth: 12 }
-	].concat([...document.querySelectorAll('.social-icons a')].map((icon, index) => {
-		return { element: icon, depth: 4 + index * 2 };
-	}));
 	let logo;
-	let pointerX = 0;
-	let pointerY = 0;
-	let driftX = 0;
-	let driftY = 0;
-	let drifting = false;
-	let lastFrame = 0;
 
 	sizeCanvas();
 	window.addEventListener('resize', sizeCanvas);
 
-	if (window.matchMedia('(hover: hover) and (pointer: fine)').matches && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-		window.addEventListener('mousemove', trackPointer);
-	}
-
 	function sizeCanvas() {
 		const mobile = window.matchMedia('(max-width: 768px) and (pointer: coarse)').matches;
 		zoom.style.zoom = mobile ? '' : window.innerWidth / 2560;
-	}
-
-	function trackPointer(event) {
-		pointerX = event.clientX / window.innerWidth * 2 - 1;
-		pointerY = event.clientY / window.innerHeight * 2 - 1;
-
-		if (!drifting) {
-			drifting = true;
-			lastFrame = performance.now();
-			requestAnimationFrame(drift);
-		}
-	}
-
-	function drift(now) {
-		const elapsed = Math.min((now - lastFrame) / 1000, 0.1);
-		const ease = 1 - Math.exp(-elapsed / 0.3);
-
-		lastFrame = now;
-		driftX += (pointerX - driftX) * ease;
-		driftY += (pointerY - driftY) * ease;
-
-		layers.forEach(layer => {
-			layer.element.style.transform = 'translate3d(' + (driftX * layer.depth).toFixed(3) + 'px, ' + (driftY * layer.depth).toFixed(3) + 'px, 0)';
-		});
-
-		if (Math.abs(pointerX - driftX) > 0.0002 || Math.abs(pointerY - driftY) > 0.0002) {
-			requestAnimationFrame(drift);
-		} else {
-			drifting = false;
-		}
 	}
 
 	window.onload = () => {
