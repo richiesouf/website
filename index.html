@@ -268,14 +268,52 @@
 <script>
 	const zoom = document.querySelector('.zoom-wrap');
 	const logos = document.querySelectorAll('.image-logo');
+	const layers = [
+		{ element: document.querySelector('.image-container'), depth: 16 },
+		{ element: document.querySelector('.page-footer'), depth: 6 }
+	];
 	let logo;
+	let pointerX = 0;
+	let pointerY = 0;
+	let driftX = 0;
+	let driftY = 0;
+	let drifting = false;
 
 	sizeCanvas();
 	window.addEventListener('resize', sizeCanvas);
 
+	if (window.matchMedia('(hover: hover) and (pointer: fine)').matches && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+		window.addEventListener('mousemove', trackPointer);
+	}
+
 	function sizeCanvas() {
 		const mobile = window.matchMedia('(max-width: 768px) and (pointer: coarse)').matches;
 		zoom.style.zoom = mobile ? '' : window.innerWidth / 2560;
+	}
+
+	function trackPointer(event) {
+		pointerX = event.clientX / window.innerWidth * 2 - 1;
+		pointerY = event.clientY / window.innerHeight * 2 - 1;
+
+		if (!drifting) {
+			drifting = true;
+			requestAnimationFrame(drift);
+		}
+	}
+
+	function drift() {
+		driftX += (pointerX - driftX) * 0.07;
+		driftY += (pointerY - driftY) * 0.07;
+
+		layers.forEach(layer => {
+			layer.element.style.transform = 'translate3d(' + (driftX * layer.depth).toFixed(2) + 'px, ' + (driftY * layer.depth).toFixed(2) + 'px, 0)';
+		});
+
+		if (Math.abs(pointerX - driftX) > 0.0005 || Math.abs(pointerY - driftY) > 0.0005) {
+			requestAnimationFrame(drift);
+		} else {
+			drifting = false;
+		}
 	}
 
 	window.onload = () => {
