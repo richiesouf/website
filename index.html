@@ -176,7 +176,7 @@
 		stroke-dasharray: var(--length);
 		stroke-dashoffset: var(--length);
 		animation-name: draw, ink;
-		animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1), ease-out;
+		animation-timing-function: cubic-bezier(0.45, 0.05, 0.55, 0.95), ease-out;
 		animation-fill-mode: forwards, backwards;
 	}
 
@@ -195,7 +195,7 @@
 	.image-logo.drawn path {
 		fill: #fff;
 		stroke-opacity: 0;
-		transition: fill 0.7s cubic-bezier(0.32, 0.72, 0, 1), stroke-opacity 0.7s cubic-bezier(0.32, 0.72, 0, 1);
+		transition: fill 0.35s cubic-bezier(0.32, 0.72, 0, 1), stroke-opacity 0.35s cubic-bezier(0.32, 0.72, 0, 1);
 	}
 
 	.page-footer {
@@ -306,9 +306,8 @@
 
 		const start = 400;
 		const stagger = 60;
-		const duration = 1700;
+		const duration = 2000;
 		const fade = 600;
-		const overlap = 250;
 		const glyphs = [...logo.querySelectorAll('path')].map(path => {
 			const box = path.getBBox();
 			return { path: path, x: box.x, y: box.y + box.height / 2, height: box.height };
@@ -325,7 +324,7 @@
 		});
 
 		logo.classList.add('drawing');
-		setTimeout(() => logo.classList.add('drawn'), start + (glyphs.length - 1) * stagger + duration - overlap);
+		setTimeout(() => logo.classList.add('drawn'), start + (glyphs.length - 1) * stagger + duration);
 	}
 
 	function generateRandomPicture(array) {
