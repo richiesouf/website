@@ -154,6 +154,17 @@
 		flex-direction: column;
 	}
 
+	@property --torch {
+		syntax: '<number>';
+		inherits: true;
+		initial-value: 1;
+	}
+
+	.image-container {
+		--torch-x: 50%;
+		--torch-y: 50%;
+	}
+
 	.image-container {
 		width: 720px;
 	}
@@ -175,9 +186,9 @@
 		vector-effect: non-scaling-stroke;
 		stroke-dasharray: var(--length);
 		stroke-dashoffset: var(--length);
-		animation-name: draw, ink;
-		animation-timing-function: cubic-bezier(0.45, 0.05, 0.55, 0.95), ease-out;
-		animation-fill-mode: forwards, backwards;
+		animation-name: draw, ink, flood;
+		animation-timing-function: cubic-bezier(0.45, 0.05, 0.55, 0.95), ease-out, cubic-bezier(0.16, 1, 0.3, 1);
+		animation-fill-mode: forwards, backwards, forwards;
 	}
 
 	@keyframes draw {
@@ -192,11 +203,13 @@
 		}
 	}
 
-	.image-logo.drawn path {
-		fill: #fff;
-		stroke-opacity: 0;
-		transition: fill 1s cubic-bezier(0.16, 1, 0.3, 1), stroke-opacity 1s cubic-bezier(0.16, 1, 0.3, 1);
+	@keyframes flood {
+		to {
+			fill: #fff;
+			stroke-opacity: 0;
+		}
 	}
+
 
 	.page-footer {
 		font-family: 'Roboto Mono', monospace !important;
@@ -215,12 +228,12 @@
 	.page-footer.shown .social-icons a {
 		opacity: 1;
 		transition: opacity 1s cubic-bezier(0.16, 1, 0.3, 1);
-		transition-delay: 180ms;
+		transition-delay: calc(var(--fill-at, 0ms) + 180ms);
 	}
 
 	.page-footer.shown .social-icons a:nth-child(2),
 	.page-footer.shown .social-icons a:nth-child(3) {
-		transition-delay: 90ms;
+		transition-delay: calc(var(--fill-at, 0ms) + 90ms);
 	}
 	
         .social-icons {
@@ -243,12 +256,35 @@
 		min-height: 26px;
         }
 
+	.social-icons svg {
+		transition: opacity 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+	}
+
 	#twitter, #instagram, #applemusic {
 		margin-right: 38px;
 	}
 	
 	.image-logo {
 		display: none;
+	}
+
+	@media (hover: hover) and (pointer: fine) {
+		.image-logo {
+			-webkit-mask-image: radial-gradient(circle 280px at var(--torch-x) var(--torch-y), #000 0%, #000 24%, rgba(0, 0, 0, var(--torch)) 74%);
+			mask-image: radial-gradient(circle 280px at var(--torch-x) var(--torch-y), #000 0%, #000 24%, rgba(0, 0, 0, var(--torch)) 74%);
+		}
+
+		.image-container {
+			transition: --torch 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+		}
+
+		.image-container:hover {
+			--torch: 0.28;
+		}
+
+		.social-icons:has(a:hover) a:not(:hover) svg {
+			opacity: 0.6;
+		}
 	}
 
 	@media (max-width: 768px) and (pointer: coarse) {
@@ -294,6 +330,17 @@
 		zoom.style.zoom = mobile ? '' : window.innerWidth / 2560;
 	}
 
+	if (window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
+		document.querySelector('.image-container').addEventListener('mousemove', trackTorch);
+	}
+
+	function trackTorch(event) {
+		const box = event.currentTarget.getBoundingClientRect();
+
+		event.currentTarget.style.setProperty('--torch-x', (event.clientX - box.left) / box.width * 100 + '%');
+		event.currentTarget.style.setProperty('--torch-y', (event.clientY - box.top) / box.height * 100 + '%');
+	}
+
 	window.onload = () => {
 		logo = generateRandomPicture(logos);
 		if (document.hidden) {
@@ -325,30 +372,26 @@
 		const stagger = 60;
 		const duration = 2000;
 		const fade = 600;
+		const flood = 1000;
 		const lead = 1375;
 		const glyphs = [...logo.querySelectorAll('path')].map(path => {
 			const box = path.getBBox();
 			return { path: path, x: box.x, y: box.y + box.height / 2, height: box.height };
 		});
 		const tolerance = glyphs.reduce((total, glyph) => total + glyph.height, 0) / glyphs.length / 2;
+		const fillAt = start + (glyphs.length - 1) * stagger + duration - lead;
 
 		glyphs.sort((a, b) => Math.abs(a.y - b.y) > tolerance ? a.y - b.y : a.x - b.x);
 		glyphs.forEach((glyph, index) => {
 			const delay = start + index * stagger;
 
 			glyph.path.style.setProperty('--length', glyph.path.getTotalLength());
-			glyph.path.style.animationDuration = duration + 'ms, ' + fade + 'ms';
-			glyph.path.style.animationDelay = delay + 'ms, ' + delay + 'ms';
+			glyph.path.style.animationDuration = duration + 'ms, ' + fade + 'ms, ' + flood + 'ms';
+			glyph.path.style.animationDelay = delay + 'ms, ' + delay + 'ms, ' + fillAt + 'ms';
 		});
 
-		const outlineEnd = start + (glyphs.length - 1) * stagger + duration;
-
 		logo.classList.add('drawing');
-		setTimeout(fill, outlineEnd - lead);
-	}
-
-	function fill() {
-		logo.classList.add('drawn');
+		footer.style.setProperty('--fill-at', fillAt + 'ms');
 		footer.classList.add('shown');
 	}
 
