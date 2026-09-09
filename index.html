@@ -168,7 +168,7 @@
 		stroke-dasharray: var(--length);
 		stroke-dashoffset: var(--length);
 		animation-name: draw;
-		animation-timing-function: cubic-bezier(0.65, 0, 0.35, 1);
+		animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
 		animation-fill-mode: forwards;
 	}
 
@@ -181,7 +181,7 @@
 	.image-logo.drawn path {
 		fill: #fff;
 		stroke-opacity: 0;
-		transition: fill 0.9s ease-out, stroke-opacity 0.9s ease-out;
+		transition: fill 0.9s cubic-bezier(0.32, 0.72, 0, 1), stroke-opacity 0.9s cubic-bezier(0.32, 0.72, 0, 1);
 	}
 
 	.page-footer {
@@ -269,9 +269,10 @@
 			return;
 		}
 
-		const start = 500;
+		const start = 400;
 		const stagger = 55;
-		const duration = 1400;
+		const duration = 1500;
+		const fillStagger = 25;
 		const glyphs = [...logo.querySelectorAll('path')].map(path => {
 			const box = path.getBBox();
 			return { path: path, x: box.x, y: box.y + box.height / 2, height: box.height };
@@ -283,6 +284,7 @@
 			glyph.path.style.setProperty('--length', glyph.path.getTotalLength());
 			glyph.path.style.animationDuration = duration + 'ms';
 			glyph.path.style.animationDelay = (start + index * stagger) + 'ms';
+			glyph.path.style.transitionDelay = (index * fillStagger) + 'ms';
 		});
 
 		logo.classList.add('drawing');
