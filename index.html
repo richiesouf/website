@@ -467,7 +467,7 @@
 		}
 	}
 
-	@media (max-width: 768px) and (pointer: coarse) {
+	@media (max-width: 768px) {
 		.tabs {
 			top: calc(100vh * 0.022426 - 10px);
 			gap: 5vw;
@@ -832,7 +832,7 @@
 	}
 
 	function sizeCanvas() {
-		const mobile = window.matchMedia('(max-width: 768px) and (pointer: coarse)').matches;
+		const mobile = window.matchMedia('(max-width: 768px)').matches;
 		zoom.style.zoom = mobile ? '' : window.innerWidth / 2560;
 	}
 
