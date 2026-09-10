@@ -18,7 +18,7 @@
 				<nav class="tabs">
 					<button class="tab tab-active" type="button" data-view="home">Home</button>
 					<button class="tab" type="button" data-view="press">Press</button>
-					<button class="tab" type="button" data-view="productions">Productions</button>
+					<button class="tab" type="button" data-view="productions">Production</button>
 				</nav>
 				<div class="image-container">
 					<svg id="logo1" class="image-logo image-logo1" xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 3240 2560" fill="#fff">
@@ -234,6 +234,28 @@
 		pointer-events: auto;
 	}
 
+	#productions {
+		display: grid;
+		grid-template-columns: repeat(3, 1fr);
+		column-gap: 25px;
+		row-gap: 25px;
+		align-content: safe center;
+	}
+
+	#productions iframe {
+		display: block;
+		width: 100%;
+		height: 178.5px;
+		border: 0;
+		overflow: hidden;
+		opacity: 0;
+		transition: opacity 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+	}
+
+	#productions iframe.loaded {
+		opacity: 1;
+	}
+
 	.row {
 		display: flex;
 		flex-shrink: 0;
@@ -438,6 +460,15 @@
 			width: 84vw;
 		}
 
+		#productions {
+			grid-template-columns: 1fr;
+			row-gap: 15px;
+		}
+
+		#productions iframe {
+			height: 120px;
+		}
+
 		.row {
 			font-size: 13px;
 			gap: 16px;
@@ -499,7 +530,6 @@
 	window.addEventListener('resize', sizeCanvas);
 
 	renderRows(panels.press, press, item => item.outlet + ', ' + item.year);
-	renderRows(panels.productions, productions, item => item.artist + ', ' + item.year);
 	tabs.addEventListener('click', event => {
 		const tab = event.target.closest('.tab');
 
@@ -535,12 +565,34 @@
 		});
 	}
 
+	function loadProduction() {
+		if (panels.productions.children.length) {
+			return;
+		}
+
+		productions.forEach(track => {
+			const frame = document.createElement('iframe');
+
+			frame.title = track.title;
+			frame.allow = 'autoplay';
+			frame.src = 'https://w.soundcloud.com/player/?url=' + encodeURIComponent(track.sc) +
+				'&color=%23000000&auto_play=false&hide_related=true&show_comments=false&show_user=true' +
+				'&show_reposts=false&show_teaser=false&visual=true&sharing=false';
+			frame.addEventListener('load', () => frame.classList.add('loaded'), { once: true });
+			panels.productions.append(frame);
+		});
+	}
+
 	function show(view) {
 		if (switching || view === current) {
 			return;
 		}
 
 		const incoming = view === 'home' ? container : panels[view];
+
+		if (view === 'productions') {
+			loadProduction();
+		}
 
 		switching = true;
 		current = view;
