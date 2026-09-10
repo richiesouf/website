@@ -711,6 +711,7 @@
 	let glyphs = [];
 	let current = 'home';
 	let hovering = false;
+	let sweeping = 0;
 	let spotify = null;
 	let awaitingApi = false;
 	let playing = null;
@@ -923,20 +924,17 @@
 
 		hovering = true;
 
-		const running = lifts();
-
-		if (running.length) {
-			running.forEach(animation => animation.effect.updateTiming({ iterations: Infinity }));
-			return;
+		if (!lifts().length) {
+			sweep();
 		}
+	}
+
+	function sweep() {
+		const id = sweeping += 1;
 
 		logo.classList.remove('wave');
 		logo.getBoundingClientRect();
 		logo.classList.add('wave');
-	}
-
-	function calm() {
-		hovering = false;
 
 		const running = lifts();
 		let pending = running.length;
@@ -946,19 +944,30 @@
 			return;
 		}
 
-		const lead = running[0];
-		const sweeps = Math.max(1, Math.ceil(lead.currentTime / lead.effect.getTiming().duration));
-
 		running.forEach(animation => {
-			animation.effect.updateTiming({ iterations: sweeps });
+			animation.effect.updateTiming({ iterations: 1 });
 			animation.addEventListener('finish', () => {
+				if (id !== sweeping) {
+					return;
+				}
+
 				pending -= 1;
 
-				if (!pending) {
+				if (pending) {
+					return;
+				}
+
+				if (hovering) {
+					sweep();
+				} else {
 					logo.classList.remove('wave');
 				}
 			}, { once: true });
 		});
+	}
+
+	function calm() {
+		hovering = false;
 	}
 
 	function lifts() {
