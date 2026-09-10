@@ -9,11 +9,16 @@
 		<style>
 			@import url('https://fonts.googleapis.com/css2?family=Roboto+Mono&display=swap');
 		</style>
-		<noscript><style>body{opacity:1;animation:none}.social-icons a{opacity:1}</style></noscript>
+		<noscript><style>body{opacity:1;animation:none}.social-icons a{opacity:1}.tabs{display:none}</style></noscript>
 	</head>
 	<body>
 		<div class="zoom-wrap">
 			<div class="page-container">
+				<nav class="tabs">
+					<button class="tab tab-active" type="button" data-view="home">Home</button>
+					<button class="tab" type="button" data-view="press">Press</button>
+					<button class="tab" type="button" data-view="productions">Productions</button>
+				</nav>
 				<div class="image-container">
 					<svg id="logo1" class="image-logo image-logo1" xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 3240 2560" fill="#fff">
 						<path d="M1988.68,888.62c-15.76,24.01-27.11,48.54-27.12,77.54l-.06,580.32c0,24.48,10.21,44.57,23.75,65.93l-155.82-.45c-63.75-.18-109.78-47.67-117.55-109.18l-14.93-118.22c-5.01-39.67-22.46-98.6-58.16-96.82l-.17,247.87c-.02,28.92,7.9,55.71,24.68,77.04l-137.9.22c12.16-19.9,23.47-41.82,23.48-67.61l.11-586.9c0-27.69-11.75-51.25-24.93-70.16l124,.86c58.39.41,110.11,31.33,136.16,84.61,53,108.38,19.52,272.21-112.4,300.03,25.88,5.57,50.03,4.97,70.47,18.9,72.03,49.09,34.46,212.56,58.96,285.71,5.54,16.53,31.21,38.64,48.39,25.91,17.69-13.11,22.35-45.37,22.36-68.91l.28-570.12c.01-28.96-8.06-52.82-24.86-76.6h141.24ZM1696.83,947.45c-10.88-23.72-30.18-39.05-58-37.22l-.02,347.95c29.42-3.54,46.76-24.38,58.09-49.34,29.79-65.62,30.23-195.29-.07-261.39Z"/>
@@ -101,6 +106,8 @@
 						</a>
 					</div>
 				</div>
+				<div class="panel" id="press"></div>
+				<div class="panel" id="productions"></div>
 			</div>
 		</div>
 		<script>
@@ -157,6 +164,98 @@
 		justify-content: center;
 		align-items: center;
 		flex-direction: column;
+	}
+
+	.tabs {
+		position: absolute;
+		top: 43px;
+		left: 0;
+		right: 0;
+		display: flex;
+		justify-content: center;
+		gap: 44px;
+		opacity: 0;
+	}
+
+	.tabs.shown {
+		opacity: 1;
+		transition: opacity 1s cubic-bezier(0.16, 1, 0.3, 1);
+		transition-delay: calc(var(--fill-at, 0ms) + 90ms);
+	}
+
+	.tab {
+		appearance: none;
+		-webkit-appearance: none;
+		background: none;
+		border: none;
+		padding: 14px;
+		font-family: 'Roboto Mono', monospace;
+		font-size: 26px;
+		letter-spacing: 0.08em;
+		text-transform: uppercase;
+		color: #fff;
+		cursor: pointer;
+		opacity: 0.5;
+		transition: opacity 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+	}
+
+	.tab-active {
+		opacity: 1;
+	}
+
+	.panel {
+		position: absolute;
+		padding: 56px 0;
+		top: 190px;
+		bottom: 190px;
+		left: 50%;
+		width: 1440px;
+		max-width: 84%;
+		transform: translateX(-50%);
+		overflow-y: auto;
+		scrollbar-width: none;
+		opacity: 0;
+		pointer-events: none;
+		transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+		-webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 56px, #000 calc(100% - 56px), transparent 100%);
+		mask-image: linear-gradient(to bottom, transparent 0, #000 56px, #000 calc(100% - 56px), transparent 100%);
+	}
+
+	.panel::-webkit-scrollbar {
+		display: none;
+	}
+
+	.panel.open {
+		opacity: 1;
+		pointer-events: auto;
+	}
+
+	.row {
+		display: flex;
+		justify-content: space-between;
+		align-items: baseline;
+		gap: 40px;
+		padding: 26px 0;
+		border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+		font-family: 'Roboto Mono', monospace;
+		font-size: 30px;
+		color: #fff;
+		text-decoration: none;
+	}
+
+	.row-meta {
+		opacity: 0.5;
+		text-align: right;
+		white-space: nowrap;
+	}
+
+	.image-container {
+		transition: opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+	}
+
+	.image-container.hidden {
+		opacity: 0;
+		pointer-events: none;
 	}
 
 	.image-container {
@@ -278,6 +377,18 @@
 	}
 
 	@media (hover: hover) and (pointer: fine) {
+		.tabs:has(.tab:hover) .tab:not(:hover) {
+			opacity: 0.5;
+		}
+
+		.tab:hover {
+			opacity: 1;
+		}
+
+		a.row:hover {
+			opacity: 0.6;
+		}
+
 		.image-logo.wave path {
 			animation: lift 700ms ease-in-out;
 			animation-delay: var(--phase);
@@ -289,6 +400,28 @@
 	}
 
 	@media (max-width: 768px) and (pointer: coarse) {
+		.tabs {
+			top: calc(100vh * 0.03);
+			gap: 5vw;
+		}
+
+		.tab {
+			font-size: 12px;
+			padding: 10px 2px;
+		}
+
+		.panel {
+			top: calc(100vh * 0.12);
+			bottom: calc(100vh * 0.12);
+			width: 84vw;
+		}
+
+		.row {
+			font-size: 13px;
+			gap: 16px;
+			padding: 14px 0;
+		}
+
 		.image-container,
 		.image-container svg {
 			width: calc(100vh * 0.37);
@@ -322,12 +455,54 @@
 	const logos = document.querySelectorAll('.image-logo');
 	const footer = document.querySelector('.page-footer');
 	const container = document.querySelector('.image-container');
+	const stage = document.querySelector('.page-container');
+	const tabs = document.querySelector('.tabs');
+	const panels = { press: document.querySelector('#press'), productions: document.querySelector('#productions') };
+	const press = [];
+	const productions = [];
 	const intro = { start: 400, stagger: 60, duration: 2000, fade: 600, flood: 1000, lead: 1375 };
 	let logo;
 	let glyphs = [];
 
 	sizeCanvas();
 	window.addEventListener('resize', sizeCanvas);
+
+	renderRows(panels.press, press, item => item.outlet + ', ' + item.year);
+	renderRows(panels.productions, productions, item => item.artist + ', ' + item.year);
+	tabs.addEventListener('click', event => {
+		const tab = event.target.closest('.tab');
+
+		if (tab) {
+			show(tab.dataset.view);
+		}
+	});
+
+	function renderRows(panel, items, meta) {
+		items.forEach(item => {
+			const row = document.createElement(item.url ? 'a' : 'div');
+			const title = document.createElement('span');
+			const detail = document.createElement('span');
+
+			if (item.url) {
+				row.href = item.url;
+				row.target = '_blank';
+			}
+
+			row.className = 'row';
+			title.className = 'row-title';
+			detail.className = 'row-meta';
+			title.textContent = item.title;
+			detail.textContent = meta(item);
+			row.append(title, detail);
+			panel.append(row);
+		});
+	}
+
+	function show(view) {
+		tabs.querySelectorAll('.tab').forEach(tab => tab.classList.toggle('tab-active', tab.dataset.view === view));
+		Object.keys(panels).forEach(name => panels[name].classList.toggle('open', name === view));
+		container.classList.toggle('hidden', view !== 'home');
+	}
 
 	function sizeCanvas() {
 		const mobile = window.matchMedia('(max-width: 768px) and (pointer: coarse)').matches;
@@ -358,6 +533,7 @@
 	function drawLogo() {
 		if (!logo || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
 			footer.classList.add('shown');
+			tabs.classList.add('shown');
 			return;
 		}
 
@@ -374,8 +550,9 @@
 			glyph.path.style.setProperty('--phase', index * 45 + 'ms');
 		});
 
-		footer.style.setProperty('--fill-at', schedule(intro) + 'ms');
+		stage.style.setProperty('--fill-at', schedule(intro) + 'ms');
 		footer.classList.add('shown');
+		tabs.classList.add('shown');
 		logo.classList.add('drawing');
 		logo.addEventListener('animationend', event => {
 			if (event.animationName === 'flood') {
