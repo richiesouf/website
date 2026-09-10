@@ -407,7 +407,7 @@
 		}
 
 		.image-logo.wave path {
-			animation: lift 700ms ease-in-out;
+			animation: lift 700ms ease-in-out infinite;
 			animation-delay: var(--phase);
 		}
 
@@ -606,14 +606,11 @@
 			if (event.animationName === 'flood') {
 				settle();
 			}
-
-			if (event.animationName === 'lift' && event.target === glyphs[glyphs.length - 1].path) {
-				logo.classList.remove('wave');
-			}
 		});
 
 		if (window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
 			container.addEventListener('mouseenter', ripple);
+			container.addEventListener('mouseleave', calm);
 		}
 	}
 
@@ -645,9 +642,46 @@
 	}
 
 	function ripple() {
-		if (logo.classList.contains('settled') && !logo.classList.contains('wave')) {
-			logo.classList.add('wave');
+		if (!logo.classList.contains('settled')) {
+			return;
 		}
+
+		const running = lifts();
+
+		if (running.length) {
+			running.forEach(animation => animation.effect.updateTiming({ iterations: Infinity }));
+			return;
+		}
+
+		logo.classList.add('wave');
+	}
+
+	function calm() {
+		const running = lifts();
+		let pending = running.length;
+
+		if (!pending) {
+			logo.classList.remove('wave');
+			return;
+		}
+
+		running.forEach(animation => {
+			const timing = animation.effect.getTiming();
+			const elapsed = animation.currentTime - timing.delay;
+
+			animation.effect.updateTiming({ iterations: elapsed > 0 ? Math.ceil(elapsed / timing.duration) : 1 });
+			animation.addEventListener('finish', () => {
+				pending -= 1;
+
+				if (!pending) {
+					logo.classList.remove('wave');
+				}
+			}, { once: true });
+		});
+	}
+
+	function lifts() {
+		return glyphs.map(glyph => glyph.path.getAnimations().find(animation => animation.animationName === 'lift')).filter(Boolean);
 	}
 
 	function generateRandomPicture(array) {
