@@ -245,6 +245,7 @@
 		font-size: 24px;
 		color: #fff;
 		text-decoration: none;
+		transition: opacity 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 	}
 
 	.row + .row {
@@ -393,8 +394,8 @@
 			opacity: 1;
 		}
 
-		a.row:hover {
-			opacity: 0.6;
+		.panel:has(a.row:hover) .row:not(:hover) {
+			opacity: 0.5;
 		}
 
 		.image-logo.wave path {
