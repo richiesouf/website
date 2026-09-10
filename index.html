@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
 	<head>
+		<meta charset="utf-8">
 		<title>Richie Souf</title>
 		<meta name="viewport" content="width=device-width, initial-scale=1.0">
 		<meta name="description" content="Richie Souf">
@@ -458,7 +459,12 @@
 	const stage = document.querySelector('.page-container');
 	const tabs = document.querySelector('.tabs');
 	const panels = { press: document.querySelector('#press'), productions: document.querySelector('#productions') };
-	const press = [];
+	const press = [
+		{ title: 'Whole Lotta Red producer Richie Souf talks collaborating with Playboi Carti, Future, & Young Thug', outlet: 'Splice', year: 2020, url: 'https://www.youtube.com/watch?v=cwdBBAkLPus' },
+		{ title: 'Richie Souf on Whole Lotta Red, Future, and beat block', outlet: 'Splice', year: 2020, url: 'https://splice.com/blog/richie-souf-q-and-a/' },
+		{ title: 'From Watching \u2018Hustle & Flow\u2019 to Producing for Future: The Richie Souf Come Up Story', outlet: 'DJBooth', year: 2019, url: 'https://djbooth.net/features/2019-06-20-richie-souf-future-interview/' },
+		{ title: 'Beat Construction: Richie Souf', outlet: 'The FADER', year: 2016, url: 'https://www.thefader.com/2016/02/04/richie-souf-interview-beat-construction' }
+	];
 	const productions = [];
 	const intro = { start: 400, stagger: 60, duration: 2000, fade: 600, flood: 1000, lead: 1375 };
 	let logo;
