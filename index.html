@@ -252,10 +252,6 @@
 		transition: opacity 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 	}
 
-	#productions iframe:not(.loaded) {
-		pointer-events: none;
-	}
-
 	#productions iframe.loaded {
 		opacity: 1;
 	}
@@ -565,8 +561,6 @@
 		{ title: 'Future - Ain\'t Coming Back', spotify: '0SCEdR34DyPTgNWvho3zLF' },
 		{ title: 'Future - Please Tell Me', spotify: '4ANFPo7dzs2DdPuONXC9bp' }
 	];
-	const loadLimit = 4;
-	const loadQueue = [];
 	const pointer = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
 	const intro = { start: 400, stagger: 60, duration: 2000, fade: 600, flood: 1000, lead: 1375 };
 	let logo;
@@ -574,7 +568,6 @@
 	let switching = false;
 	let current = 'home';
 	let hovering = false;
-	let loadLive = 0;
 
 	sizeCanvas();
 	window.addEventListener('resize', sizeCanvas);
@@ -625,43 +618,12 @@
 			const id = track.spotify.split('/track/').pop().split('?')[0];
 
 			frame.title = track.title;
+			frame.loading = 'lazy';
 			frame.allow = 'autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture';
-			frame.dataset.src = 'https://open.spotify.com/embed/track/' + id + '?theme=0';
+			frame.src = 'https://open.spotify.com/embed/track/' + id + '?theme=0';
+			frame.addEventListener('load', () => frame.classList.add('loaded'), { once: true });
 			panels.productions.append(frame);
-
-			loadQueue.push(done => {
-				const step = () => {
-					frame.classList.add('loaded');
-					done();
-				};
-
-				frame.addEventListener('load', step, { once: true });
-				frame.addEventListener('error', step, { once: true });
-				setTimeout(step, 12000);
-				frame.src = frame.dataset.src;
-				frame.removeAttribute('data-src');
-			});
 		});
-
-		pumpLoads();
-	}
-
-	function pumpLoads() {
-		while (loadLive < loadLimit && loadQueue.length) {
-			const start = loadQueue.shift();
-			let stepped = false;
-
-			loadLive += 1;
-			start(() => {
-				if (stepped) {
-					return;
-				}
-
-				stepped = true;
-				loadLive -= 1;
-				pumpLoads();
-			});
-		}
 	}
 
 	function show(view) {
