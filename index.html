@@ -169,7 +169,7 @@
 
 	.tabs {
 		position: absolute;
-		top: 23.99px;
+		top: 24.21px;
 		left: 0;
 		right: 0;
 		display: flex;
@@ -659,14 +659,8 @@
 		}
 
 		hovering = true;
-
-		const running = lifts();
-
-		if (running.length) {
-			running.forEach(animation => animation.effect.updateTiming({ iterations: Infinity }));
-			return;
-		}
-
+		logo.classList.remove('wave');
+		logo.getBoundingClientRect();
 		logo.classList.add('wave');
 	}
 
