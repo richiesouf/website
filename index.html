@@ -322,8 +322,13 @@
 	}
 
 	@keyframes lift {
-		50% {
+		15% {
 			transform: translateY(-48px);
+		}
+
+		30%,
+		100% {
+			transform: translateY(0);
 		}
 	}
 
@@ -407,7 +412,7 @@
 		}
 
 		.image-logo.wave path {
-			animation: lift 700ms ease-in-out infinite;
+			animation: lift 2300ms ease-in-out infinite;
 			animation-delay: var(--phase);
 		}
 
