@@ -672,6 +672,7 @@
 
 	function calm() {
 		hovering = false;
+
 		const running = lifts();
 		let pending = running.length;
 
@@ -680,11 +681,11 @@
 			return;
 		}
 
-		running.forEach(animation => {
-			const timing = animation.effect.getTiming();
-			const elapsed = animation.currentTime - timing.delay;
+		const lead = running[0];
+		const sweeps = Math.max(1, Math.ceil(lead.currentTime / lead.effect.getTiming().duration));
 
-			animation.effect.updateTiming({ iterations: elapsed > 0 ? Math.ceil(elapsed / timing.duration) : 1 });
+		running.forEach(animation => {
+			animation.effect.updateTiming({ iterations: sweeps });
 			animation.addEventListener('finish', () => {
 				pending -= 1;
 
