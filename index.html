@@ -245,11 +245,15 @@
 		font-size: 24px;
 		color: #fff;
 		text-decoration: none;
-		transition: opacity 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 	}
 
 	.row + .row {
 		border-top: 1px solid rgba(255, 255, 255, 0.12);
+	}
+
+	.row-title,
+	.row-meta {
+		transition: opacity 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 	}
 
 	.row-meta {
@@ -394,8 +398,12 @@
 			opacity: 1;
 		}
 
-		.panel:has(a.row:hover) .row:not(:hover) {
+		.panel:has(a.row:hover) .row:not(:hover) .row-title {
 			opacity: 0.5;
+		}
+
+		.panel:has(a.row:hover) .row:not(:hover) .row-meta {
+			opacity: 0.25;
 		}
 
 		.image-logo.wave path {
