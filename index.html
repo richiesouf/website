@@ -245,7 +245,7 @@
 	#productions iframe {
 		display: block;
 		width: 100%;
-		height: 178.5px;
+		height: 152px;
 		border: 0;
 		overflow: hidden;
 		opacity: 0;
@@ -466,7 +466,7 @@
 		}
 
 		#productions iframe {
-			height: 120px;
+			height: 152px;
 		}
 
 		.row {
@@ -517,11 +517,7 @@
 		{ title: 'From Watching \u2018Hustle & Flow\u2019 to Producing for Future: The Richie Souf Come Up Story', outlet: 'DJBooth', year: 2019, url: 'https://djbooth.net/features/2019-06-20-richie-souf-future-interview/' },
 		{ title: 'Beat Construction: Richie Souf', outlet: 'The FADER', year: 2016, url: 'https://www.thefader.com/2016/02/04/richie-souf-interview-beat-construction' }
 	];
-	const productions = [
-		{ title: 'Gunna - Rich Bitch', sc: 'https://soundcloud.com/josh-sibby-sibanda/rich-bitch' },
-		{ title: 'Playboi Carti - Jump Out The House', sc: 'https://soundcloud.com/playboicarti/jump-out-the-house' },
-		{ title: 'Playboi Carti - F33l Lik3 Dyin', sc: 'https://soundcloud.com/playboicarti/f33l-lik3-dyin' }
-	];
+	const productions = [];
 	const pointer = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
 	const intro = { start: 400, stagger: 60, duration: 2000, fade: 600, flood: 1000, lead: 1375 };
 	let logo;
@@ -576,12 +572,12 @@
 
 		productions.forEach(track => {
 			const frame = document.createElement('iframe');
+			const id = track.spotify.split('/track/').pop().split('?')[0];
 
 			frame.title = track.title;
-			frame.allow = 'autoplay';
-			frame.src = 'https://w.soundcloud.com/player/?url=' + encodeURIComponent(track.sc) +
-				'&color=%23000000&auto_play=false&hide_related=true&show_comments=false&show_user=true' +
-				'&show_reposts=false&show_teaser=false&visual=true&sharing=false';
+			frame.loading = 'lazy';
+			frame.allow = 'autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture';
+			frame.src = 'https://open.spotify.com/embed/track/' + id + '?theme=0';
 			frame.addEventListener('load', () => frame.classList.add('loaded'), { once: true });
 			panels.productions.append(frame);
 		});
