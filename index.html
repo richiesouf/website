@@ -154,17 +154,6 @@
 		flex-direction: column;
 	}
 
-	@property --torch {
-		syntax: '<number>';
-		inherits: true;
-		initial-value: 1;
-	}
-
-	.image-container {
-		--torch-x: 50%;
-		--torch-y: 50%;
-	}
-
 	.image-container {
 		width: 720px;
 	}
@@ -186,9 +175,15 @@
 		vector-effect: non-scaling-stroke;
 		stroke-dasharray: var(--length);
 		stroke-dashoffset: var(--length);
-		animation-name: draw, ink, flood;
-		animation-timing-function: cubic-bezier(0.45, 0.05, 0.55, 0.95), ease-out, cubic-bezier(0.16, 1, 0.3, 1);
-		animation-fill-mode: forwards, backwards, forwards;
+		animation-name: drain, draw, ink, flood;
+		animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1), cubic-bezier(0.45, 0.05, 0.55, 0.95), ease-out, cubic-bezier(0.16, 1, 0.3, 1);
+		animation-fill-mode: both, both, backwards, forwards;
+	}
+
+	@keyframes drain {
+		from {
+			fill: #fff;
+		}
 	}
 
 	@keyframes draw {
@@ -269,19 +264,6 @@
 	}
 
 	@media (hover: hover) and (pointer: fine) {
-		.image-logo {
-			-webkit-mask-image: radial-gradient(circle 280px at var(--torch-x) var(--torch-y), #000 0%, #000 24%, rgba(0, 0, 0, var(--torch)) 74%);
-			mask-image: radial-gradient(circle 280px at var(--torch-x) var(--torch-y), #000 0%, #000 24%, rgba(0, 0, 0, var(--torch)) 74%);
-		}
-
-		.image-container {
-			transition: --torch 0.7s cubic-bezier(0.16, 1, 0.3, 1);
-		}
-
-		.image-container:hover {
-			--torch: 0.28;
-		}
-
 		.social-icons:has(a:hover) a:not(:hover) svg {
 			opacity: 0.5;
 		}
@@ -320,7 +302,12 @@
 	const zoom = document.querySelector('.zoom-wrap');
 	const logos = document.querySelectorAll('.image-logo');
 	const footer = document.querySelector('.page-footer');
+	const container = document.querySelector('.image-container');
+	const intro = { drain: 260, start: 400, stagger: 60, duration: 2000, fade: 600, flood: 1000, lead: 1375 };
+	const replay = { drain: 300, start: 140, stagger: 26, duration: 700, fade: 200, flood: 420, lead: 240 };
 	let logo;
+	let glyphs = [];
+	let playing = true;
 
 	sizeCanvas();
 	window.addEventListener('resize', sizeCanvas);
@@ -328,17 +315,6 @@
 	function sizeCanvas() {
 		const mobile = window.matchMedia('(max-width: 768px) and (pointer: coarse)').matches;
 		zoom.style.zoom = mobile ? '' : window.innerWidth / 2560;
-	}
-
-	if (window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
-		document.querySelector('.image-container').addEventListener('mousemove', trackTorch);
-	}
-
-	function trackTorch(event) {
-		const box = event.currentTarget.getBoundingClientRect();
-
-		event.currentTarget.style.setProperty('--torch-x', (event.clientX - box.left) / box.width * 100 + '%');
-		event.currentTarget.style.setProperty('--torch-y', (event.clientY - box.top) / box.height * 100 + '%');
 	}
 
 	window.onload = () => {
@@ -368,31 +344,53 @@
 			return;
 		}
 
-		const start = 400;
-		const stagger = 60;
-		const duration = 2000;
-		const fade = 600;
-		const flood = 1000;
-		const lead = 1375;
-		const glyphs = [...logo.querySelectorAll('path')].map(path => {
+		glyphs = [...logo.querySelectorAll('path')].map(path => {
 			const box = path.getBBox();
 			return { path: path, x: box.x, y: box.y + box.height / 2, height: box.height };
 		});
+
 		const tolerance = glyphs.reduce((total, glyph) => total + glyph.height, 0) / glyphs.length / 2;
-		const fillAt = start + (glyphs.length - 1) * stagger + duration - lead;
 
 		glyphs.sort((a, b) => Math.abs(a.y - b.y) > tolerance ? a.y - b.y : a.x - b.x);
-		glyphs.forEach((glyph, index) => {
-			const delay = start + index * stagger;
+		glyphs.forEach(glyph => glyph.path.style.setProperty('--length', glyph.path.getTotalLength()));
 
-			glyph.path.style.setProperty('--length', glyph.path.getTotalLength());
-			glyph.path.style.animationDuration = duration + 'ms, ' + fade + 'ms, ' + flood + 'ms';
-			glyph.path.style.animationDelay = delay + 'ms, ' + delay + 'ms, ' + fillAt + 'ms';
+		footer.style.setProperty('--fill-at', schedule(intro) + 'ms');
+		footer.classList.add('shown');
+		logo.classList.add('drawing');
+		logo.addEventListener('animationend', event => {
+			if (event.animationName === 'flood') {
+				playing = false;
+			}
 		});
 
+		if (window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
+			container.addEventListener('mouseenter', redraw);
+		}
+	}
+
+	function schedule(timing) {
+		const fillAt = timing.start + (glyphs.length - 1) * timing.stagger + timing.duration - timing.lead;
+
+		glyphs.forEach((glyph, index) => {
+			const delay = timing.start + index * timing.stagger;
+
+			glyph.path.style.animationDuration = [timing.drain, timing.duration, timing.fade, timing.flood].join('ms, ') + 'ms';
+			glyph.path.style.animationDelay = [0, delay, delay, fillAt].join('ms, ') + 'ms';
+		});
+
+		return fillAt;
+	}
+
+	function redraw() {
+		if (playing) {
+			return;
+		}
+
+		playing = true;
+		logo.classList.remove('drawing');
+		logo.getBoundingClientRect();
+		schedule(replay);
 		logo.classList.add('drawing');
-		footer.style.setProperty('--fill-at', fillAt + 'ms');
-		footer.classList.add('shown');
 	}
 
 	function generateRandomPicture(array) {
