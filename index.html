@@ -440,6 +440,11 @@
 		overflow: visible;
 	}
 
+	.image-logo.wave path {
+		animation: lift 2000ms ease-in-out infinite;
+		animation-delay: var(--phase);
+	}
+
 	@media (hover: hover) and (pointer: fine) {
 		.tabs:has(.tab:hover) .tab:not(:hover) {
 			opacity: 0.5;
@@ -455,11 +460,6 @@
 
 		.panel:has(a.row:hover) .row:not(:hover) .row-meta {
 			opacity: 0.25;
-		}
-
-		.image-logo.wave path {
-			animation: lift 2000ms ease-in-out infinite;
-			animation-delay: var(--phase);
 		}
 
 		.social-icons:has(a:hover) a:not(:hover) svg {
@@ -732,6 +732,10 @@
 		container.addEventListener('mouseenter', ripple);
 		container.addEventListener('mousemove', ripple);
 		container.addEventListener('mouseleave', calm);
+	} else {
+		container.addEventListener('pointerdown', ripple);
+		container.addEventListener('pointerup', calm);
+		container.addEventListener('pointercancel', calm);
 	}
 
 	function renderRows(panel, items, meta) {
