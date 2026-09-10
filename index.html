@@ -175,15 +175,9 @@
 		vector-effect: non-scaling-stroke;
 		stroke-dasharray: var(--length);
 		stroke-dashoffset: var(--length);
-		animation-name: drain, draw, ink, flood;
-		animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1), cubic-bezier(0.45, 0.05, 0.55, 0.95), ease-out, cubic-bezier(0.16, 1, 0.3, 1);
-		animation-fill-mode: both, both, backwards, forwards;
-	}
-
-	@keyframes drain {
-		from {
-			fill: #fff;
-		}
+		animation-name: draw, ink, flood;
+		animation-timing-function: cubic-bezier(0.45, 0.05, 0.55, 0.95), ease-out, cubic-bezier(0.16, 1, 0.3, 1);
+		animation-fill-mode: forwards, backwards, forwards;
 	}
 
 	@keyframes draw {
@@ -205,6 +199,16 @@
 		}
 	}
 
+
+	.image-logo.settled path {
+		fill: #fff;
+	}
+
+	@keyframes lift {
+		50% {
+			transform: translateY(-48px);
+		}
+	}
 
 	.page-footer {
 		font-family: 'Roboto Mono', monospace !important;
@@ -264,6 +268,11 @@
 	}
 
 	@media (hover: hover) and (pointer: fine) {
+		.image-logo.wave path {
+			animation: lift 700ms ease-in-out;
+			animation-delay: var(--phase);
+		}
+
 		.social-icons:has(a:hover) a:not(:hover) svg {
 			opacity: 0.5;
 		}
@@ -303,11 +312,9 @@
 	const logos = document.querySelectorAll('.image-logo');
 	const footer = document.querySelector('.page-footer');
 	const container = document.querySelector('.image-container');
-	const intro = { drain: 260, start: 400, stagger: 60, duration: 2000, fade: 600, flood: 1000, lead: 1375 };
-	const replay = { drain: 300, start: 140, stagger: 26, duration: 700, fade: 200, flood: 420, lead: 240 };
+	const intro = { start: 400, stagger: 60, duration: 2000, fade: 600, flood: 1000, lead: 1375 };
 	let logo;
 	let glyphs = [];
-	let playing = true;
 
 	sizeCanvas();
 	window.addEventListener('resize', sizeCanvas);
@@ -352,19 +359,26 @@
 		const tolerance = glyphs.reduce((total, glyph) => total + glyph.height, 0) / glyphs.length / 2;
 
 		glyphs.sort((a, b) => Math.abs(a.y - b.y) > tolerance ? a.y - b.y : a.x - b.x);
-		glyphs.forEach(glyph => glyph.path.style.setProperty('--length', glyph.path.getTotalLength()));
+		glyphs.forEach((glyph, index) => {
+			glyph.path.style.setProperty('--length', glyph.path.getTotalLength());
+			glyph.path.style.setProperty('--phase', index * 45 + 'ms');
+		});
 
 		footer.style.setProperty('--fill-at', schedule(intro) + 'ms');
 		footer.classList.add('shown');
 		logo.classList.add('drawing');
 		logo.addEventListener('animationend', event => {
 			if (event.animationName === 'flood') {
-				playing = false;
+				settle();
+			}
+
+			if (event.animationName === 'lift' && event.target === glyphs[glyphs.length - 1].path) {
+				logo.classList.remove('wave');
 			}
 		});
 
 		if (window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
-			container.addEventListener('mouseenter', redraw);
+			container.addEventListener('mouseenter', ripple);
 		}
 	}
 
@@ -374,23 +388,31 @@
 		glyphs.forEach((glyph, index) => {
 			const delay = timing.start + index * timing.stagger;
 
-			glyph.path.style.animationDuration = [timing.drain, timing.duration, timing.fade, timing.flood].join('ms, ') + 'ms';
-			glyph.path.style.animationDelay = [0, delay, delay, fillAt].join('ms, ') + 'ms';
+			glyph.path.style.animationDuration = [timing.duration, timing.fade, timing.flood].join('ms, ') + 'ms';
+			glyph.path.style.animationDelay = [delay, delay, fillAt].join('ms, ') + 'ms';
 		});
 
 		return fillAt;
 	}
 
-	function redraw() {
-		if (playing) {
+	function settle() {
+		if (!logo.classList.contains('drawing')) {
 			return;
 		}
 
-		playing = true;
+		glyphs.forEach(glyph => {
+			glyph.path.style.animationDuration = '';
+			glyph.path.style.animationDelay = '';
+		});
+
 		logo.classList.remove('drawing');
-		logo.getBoundingClientRect();
-		schedule(replay);
-		logo.classList.add('drawing');
+		logo.classList.add('settled');
+	}
+
+	function ripple() {
+		if (logo.classList.contains('settled') && !logo.classList.contains('wave')) {
+			logo.classList.add('wave');
+		}
 	}
 
 	function generateRandomPicture(array) {
