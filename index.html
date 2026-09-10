@@ -922,6 +922,14 @@
 		}
 
 		hovering = true;
+
+		const running = lifts();
+
+		if (running.length) {
+			running.forEach(animation => animation.effect.updateTiming({ iterations: Infinity }));
+			return;
+		}
+
 		logo.classList.remove('wave');
 		logo.getBoundingClientRect();
 		logo.classList.add('wave');
