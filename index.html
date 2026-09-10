@@ -565,7 +565,6 @@
 	const intro = { start: 400, stagger: 60, duration: 2000, fade: 600, flood: 1000, lead: 1375 };
 	let logo;
 	let glyphs = [];
-	let switching = false;
 	let current = 'home';
 	let hovering = false;
 
@@ -627,37 +626,19 @@
 	}
 
 	function show(view) {
-		if (switching || view === current) {
+		if (view === current) {
 			return;
 		}
 
-		const incoming = view === 'home' ? container : panels[view];
+		current = view;
 
 		if (view === 'productions') {
 			loadProduction();
 		}
 
-		switching = true;
-		current = view;
 		tabs.querySelectorAll('.tab').forEach(tab => tab.classList.toggle('tab-active', tab.dataset.view === view));
 		Object.keys(panels).forEach(name => panels[name].classList.toggle('open', name === view));
 		container.classList.toggle('hidden', view !== 'home');
-		release(incoming);
-	}
-
-	function release(element) {
-		const settle = event => {
-			if (event && event.target !== element) {
-				return;
-			}
-
-			element.removeEventListener('transitionend', settle);
-			clearTimeout(guard);
-			switching = false;
-		};
-		const guard = setTimeout(settle, parseFloat(getComputedStyle(element).transitionDuration) * 1000 + 100);
-
-		element.addEventListener('transitionend', settle);
 	}
 
 	function sizeCanvas() {
@@ -746,6 +727,8 @@
 		if (pointer && container.matches(':hover')) {
 			ripple();
 		}
+
+		loadProduction();
 	}
 
 	function ripple() {
