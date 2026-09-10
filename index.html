@@ -242,12 +242,18 @@
 		align-content: safe center;
 	}
 
+	#productions .cell {
+		height: 80px;
+		border-radius: 12px;
+		background: #1a1a1a;
+		overflow: hidden;
+	}
+
 	#productions iframe {
 		display: block;
 		width: 100%;
-		height: 80px;
+		height: 100%;
 		border: 0;
-		overflow: hidden;
 		opacity: 0;
 		transition: opacity 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 	}
@@ -465,10 +471,6 @@
 			row-gap: 15px;
 		}
 
-		#productions iframe {
-			height: 80px;
-		}
-
 		.row {
 			font-size: 13px;
 			gap: 16px;
@@ -613,15 +615,18 @@
 		}
 
 		productions.forEach(track => {
+			const cell = document.createElement('div');
 			const frame = document.createElement('iframe');
 			const id = track.spotify.split('/track/').pop().split('?')[0];
 
+			cell.className = 'cell';
 			frame.title = track.title;
 			frame.loading = 'lazy';
 			frame.allow = 'autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture';
 			frame.src = 'https://open.spotify.com/embed/track/' + id + '?theme=0';
 			frame.addEventListener('load', () => frame.classList.add('loaded'), { once: true });
-			panels.productions.append(frame);
+			cell.append(frame);
+			panels.productions.append(cell);
 		});
 	}
 
