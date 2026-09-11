@@ -129,8 +129,8 @@
 				flex-direction: column;
 				justify-content: flex-start;
 				padding: 56px 0;
-				top: -103.843px;
-				bottom: -104px;
+				top: calc(52.197px - clamp(72px, 10.8vh, 156px));
+				bottom: calc(66px - clamp(80px, 11.8vh, 170px));
 				left: 50%;
 				width: 1440px;
 				max-width: 84%;
@@ -160,7 +160,7 @@
 
 			#productions {
 				display: grid;
-				grid-template-columns: repeat(3, 1fr);
+				grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
 				column-gap: 25px;
 				row-gap: 25px;
 				align-content: safe center;
@@ -229,8 +229,8 @@
 
 			.stage {
 				position: absolute;
-				top: 156.04px;
-				bottom: 170px;
+				top: clamp(72px, 10.8vh, 156px);
+				bottom: clamp(80px, 11.8vh, 170px);
 				left: 0;
 				right: 0;
 				display: flex;
@@ -244,7 +244,7 @@
 				-webkit-user-select: none;
 				user-select: none;
 				touch-action: manipulation;
-				width: 720px;
+				width: min(720px, 50vh, 62vw);
 				transition: opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1);
 			}
 
@@ -254,7 +254,8 @@
 			}
 
 			.image-container svg {
-				width: 720px;
+				width: 100%;
+				height: auto;
 			}
 
 			.image-logo path {
@@ -549,7 +550,6 @@
 			</div>
 		</div>
 		<script>
-			const zoom = document.querySelector('.zoom-wrap');
 			const logos = document.querySelectorAll('.image-logo');
 			const footer = document.querySelector('.page-footer');
 			const container = document.querySelector('.image-container');
@@ -927,8 +927,6 @@
 			}
 
 			function sizeCanvas() {
-				const mobile = handheld.matches;
-				zoom.style.zoom = mobile ? '' : window.innerWidth / 2560;
 				bindLogo();
 			}
 
