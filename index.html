@@ -256,6 +256,7 @@
 			}
 
 			.stage {
+				perspective: 1500px;
 				position: absolute;
 				top: clamp(72px, 10.8vh, 156px);
 				bottom: clamp(80px, 11.8vh, 170px);
@@ -273,7 +274,14 @@
 				user-select: none;
 				touch-action: manipulation;
 				width: min(720px, 50vh, 62vw);
-				transition: opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+				transform: rotateX(var(--pitch, 0deg)) rotateY(var(--yaw, 0deg)) translateZ(var(--rise, 0px));
+				transition: opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1), transform 900ms cubic-bezier(0.16, 1, 0.3, 1);
+				transform-style: preserve-3d;
+				will-change: transform;
+			}
+
+			.image-container.tracking {
+				transition: opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1), transform 220ms cubic-bezier(0.22, 1, 0.36, 1);
 			}
 
 			.image-container.hidden {
@@ -291,11 +299,6 @@
 				transform-origin: 50% 50%;
 				stroke-linecap: round;
 				stroke-linejoin: round;
-			}
-
-			.image-logo.wave path {
-				animation: assemble 1650ms both;
-				animation-delay: var(--burst);
 			}
 
 			.image-logo.drawing path {
@@ -328,28 +331,6 @@
 					fill: #fff;
 					stroke-opacity: 0;
 				}
-			}
-
-			@keyframes assemble {
-				from {
-					transform: translate(0, 0) rotate(0);
-					animation-timing-function: cubic-bezier(0.16, 0.86, 0.28, 1);
-				}
-
-				15% {
-					transform: translate(var(--dx), var(--dy)) rotate(var(--spin));
-					animation-timing-function: cubic-bezier(0.18, 1.46, 0.32, 1);
-				}
-
-				68%,
-				to {
-					transform: translate(0, 0) rotate(0);
-				}
-			}
-
-
-			.image-logo.settled path {
-				fill: #fff;
 			}
 
 			.page-footer {
@@ -765,7 +746,6 @@
 			let glyphs = [];
 			let current = 'home';
 			let hovering = false;
-			let sweeping = 0;
 			let spotify = null;
 			let awaitingApi = false;
 			let waiting = null;
@@ -817,21 +797,21 @@
 
 				bound = handheld.matches;
 				calm();
-				container.removeEventListener('mouseenter', ripple);
-				container.removeEventListener('mousemove', ripple);
-				container.removeEventListener('mouseleave', calm);
+				container.removeEventListener('pointerenter', ripple);
 				container.removeEventListener('pointerdown', ripple);
+				container.removeEventListener('pointermove', track);
+				container.removeEventListener('pointerleave', calm);
 				container.removeEventListener('pointerup', calm);
 				container.removeEventListener('pointercancel', calm);
+				container.addEventListener('pointermove', track);
 
 				if (handheld.matches) {
 					container.addEventListener('pointerdown', ripple);
 					container.addEventListener('pointerup', calm);
 					container.addEventListener('pointercancel', calm);
 				} else {
-					container.addEventListener('mouseenter', ripple);
-					container.addEventListener('mousemove', ripple);
-					container.addEventListener('mouseleave', calm);
+					container.addEventListener('pointerenter', ripple);
+					container.addEventListener('pointerleave', calm);
 				}
 			}
 
@@ -1027,23 +1007,9 @@
 				const tolerance = glyphs.reduce((total, glyph) => total + glyph.height, 0) / glyphs.length / 2;
 
 				glyphs.sort((a, b) => Math.abs(a.y - b.y) > tolerance ? a.y - b.y : a.x - b.x);
-
-				const core = {
-					x: glyphs.reduce((total, glyph) => total + glyph.x, 0) / glyphs.length,
-					y: glyphs.reduce((total, glyph) => total + glyph.y, 0) / glyphs.length
-				};
 				glyphs.forEach((glyph, index) => {
 					glyph.path.style.setProperty('--length', glyph.path.getTotalLength());
 					glyph.path.style.setProperty('--phase', index * 45 + 'ms');
-					const churn = Math.sin(index * 12.9898) * 43758.5453;
-					const jitter = churn - Math.floor(churn);
-					const away = Math.atan2(glyph.y - core.y, glyph.x - core.x);
-					const reach = 240 + jitter * 460;
-
-					glyph.path.style.setProperty('--dx', Math.round(Math.cos(away) * reach) + 'px');
-					glyph.path.style.setProperty('--dy', Math.round(Math.sin(away) * reach * 0.8) + 'px');
-					glyph.path.style.setProperty('--spin', ((jitter - 0.5) * 17).toFixed(2) + 'deg');
-					glyph.path.style.setProperty('--burst', Math.round(jitter * 135) + 'ms');
 				});
 
 				stage.style.setProperty('--fill-at', schedule(intro) + 'ms');
@@ -1083,68 +1049,39 @@
 				logo.classList.remove('drawing');
 				logo.classList.add('settled');
 
-				if (!handheld.matches && container.matches(':hover')) {
-					ripple();
-				}
-
 				loadProduction();
 			}
 
-			function ripple() {
-				if (hovering || !logo.classList.contains('settled')) {
+			function ripple(event) {
+				if (!logo.classList.contains('settled')) {
 					return;
 				}
 
 				hovering = true;
-
-				if (!lifts().length) {
-					sweep();
-				}
+				container.classList.add('tracking');
+				track(event);
 			}
 
-			function sweep() {
-				const id = sweeping += 1;
-
-				logo.classList.remove('wave');
-				logo.getBoundingClientRect();
-				logo.classList.add('wave');
-
-				const running = lifts();
-				let pending = running.length;
-
-				if (!pending) {
-					logo.classList.remove('wave');
+			function track(event) {
+				if (!hovering || !event || event.clientX === undefined) {
 					return;
 				}
 
-				running.forEach(animation => {
-					animation.effect.updateTiming({ iterations: 1 });
-					animation.addEventListener('finish', () => {
-						if (id !== sweeping) {
-							return;
-						}
+				const box = container.getBoundingClientRect();
+				const across = Math.max(-0.5, Math.min(0.5, (event.clientX - box.left) / box.width - 0.5));
+				const down = Math.max(-0.5, Math.min(0.5, (event.clientY - box.top) / box.height - 0.5));
 
-						pending -= 1;
-
-						if (pending) {
-							return;
-						}
-
-						if (hovering) {
-							sweep();
-						} else {
-							logo.classList.remove('wave');
-						}
-					}, { once: true });
-				});
+				container.style.setProperty('--yaw', (across * 34).toFixed(2) + 'deg');
+				container.style.setProperty('--pitch', (down * -24).toFixed(2) + 'deg');
+				container.style.setProperty('--rise', Math.round(64 - Math.hypot(across, down) * 46) + 'px');
 			}
 
 			function calm() {
 				hovering = false;
-			}
-
-			function lifts() {
-				return glyphs.map(glyph => glyph.path.getAnimations().find(animation => animation.animationName === 'assemble')).filter(Boolean);
+				container.classList.remove('tracking');
+				container.style.setProperty('--yaw', '0deg');
+				container.style.setProperty('--pitch', '0deg');
+				container.style.setProperty('--rise', '0px');
 			}
 
 			function generateRandomPicture() {
