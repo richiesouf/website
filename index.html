@@ -284,6 +284,9 @@
 			}
 
 			.image-logo path {
+				transform-box: fill-box;
+				transform-origin: 50% 100%;
+				transition: opacity 520ms cubic-bezier(0.16, 1, 0.3, 1);
 				stroke-linecap: round;
 				stroke-linejoin: round;
 			}
@@ -325,14 +328,16 @@
 				fill: #fff;
 			}
 
-			@keyframes lift {
+			@keyframes flare {
 				28.9916% {
-					transform: translateY(-48px);
+					opacity: 1;
+					transform: translateY(-34px) scale(1.035);
 				}
 
 				57.9832%,
 				100% {
-					transform: translateY(0);
+					opacity: 0.32;
+					transform: translateY(0) scale(1);
 				}
 			}
 
@@ -396,7 +401,8 @@
 			}
 
 			.image-logo.wave path {
-				animation: lift 1190ms ease-in-out infinite;
+				opacity: 0.32;
+				animation: flare 1190ms ease-in-out infinite;
 				animation-delay: var(--phase);
 			}
 
@@ -1118,7 +1124,7 @@
 			}
 
 			function lifts() {
-				return glyphs.map(glyph => glyph.path.getAnimations().find(animation => animation.animationName === 'lift')).filter(Boolean);
+				return glyphs.map(glyph => glyph.path.getAnimations().find(animation => animation.animationName === 'flare')).filter(Boolean);
 			}
 
 			function generateRandomPicture() {
