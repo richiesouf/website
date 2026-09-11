@@ -397,21 +397,20 @@
 				}
 			}
 
-			@media (max-width: 768px) {
+			@media (max-width: 1279.98px) {
 				.tabs {
 					top: 18px;
 					gap: 30px;
 				}
 
 				.tab {
-					font-size: calc(100vh * 0.0147783);
-					font-size: calc(100svh * 0.0147783);
+					font-size: 12px;
 					padding: 10px 0;
 				}
 
 				.panel {
-					top: -84.28px;
-					bottom: -78.27px;
+					top: calc(17px - 100svh * 0.12);
+					bottom: calc(23.01px - 100svh * 0.12);
 					width: 84vw;
 				}
 
@@ -725,7 +724,7 @@
 				{ title: 'K CAMP, French Montana, iAmTheGENIUS - Money I Made', spotify: '5L3WIRwnLlSy7mgvyDwzcd', color: '#9f0000' }
 			];
 			let nearby = null;
-			const handheld = window.matchMedia('(max-width: 768px)');
+			const handheld = window.matchMedia('(max-width: 1279.98px)');
 			let bound = null;
 			const intro = { start: 400, stagger: 60, duration: 2000, fade: 600, flood: 1000, lead: 1375 };
 			let logo;
