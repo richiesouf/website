@@ -162,8 +162,7 @@
 				transform: translateX(-50%);
 				overflow-y: auto;
 				overscroll-behavior: contain;
-				scrollbar-width: thin;
-				scrollbar-color: rgba(255, 255, 255, 0.25) transparent;
+				scrollbar-width: none;
 				opacity: 0;
 				pointer-events: none;
 				transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1);
@@ -172,16 +171,7 @@
 			}
 
 			.panel::-webkit-scrollbar {
-				width: 8px;
-			}
-
-			.panel::-webkit-scrollbar-track {
-				background: transparent;
-			}
-
-			.panel::-webkit-scrollbar-thumb {
-				background: rgba(255, 255, 255, 0.25);
-				border-radius: 4px;
+				display: none;
 			}
 
 			.panel.open {
