@@ -1143,8 +1143,10 @@
 			function drift(now) {
 				const step = last ? Math.min(64, now - last) : 16.7;
 				const pull = 1 - Math.pow(1 - (hovering ? 0.13 : 0.06), step / 16.7);
-				last = now;
 				let travelling = false;
+
+				chasing = false;
+				last = now;
 
 				Object.keys(aim).forEach(key => {
 					const gap = aim[key] - shown[key];
@@ -1159,15 +1161,16 @@
 				container.style.setProperty('--yaw', shown.yaw.toFixed(3) + 'deg');
 				container.style.setProperty('--pitch', shown.pitch.toFixed(3) + 'deg');
 				container.style.setProperty('--rise', shown.rise.toFixed(2) + 'px');
-				logo.style.setProperty('--lx', shown.lx.toFixed(1) + 'px');
-				logo.style.setProperty('--ly', shown.ly.toFixed(1) + 'px');
 
-				if (travelling || hovering) {
-					requestAnimationFrame(drift);
-					return;
+				if (logo) {
+					logo.style.setProperty('--lx', shown.lx.toFixed(1) + 'px');
+					logo.style.setProperty('--ly', shown.ly.toFixed(1) + 'px');
 				}
 
-				chasing = false;
+				if (travelling || hovering) {
+					chasing = true;
+					requestAnimationFrame(drift);
+				}
 			}
 
 			function generateRandomPicture() {
