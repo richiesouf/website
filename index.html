@@ -439,14 +439,14 @@
 	<body>
 		<div class="zoom-wrap">
 			<div class="page-container">
-				<nav class="tabs">
-					<button class="tab tab-active" type="button" data-view="home">Home</button>
-					<button class="tab" type="button" data-view="press">Press</button>
-					<button class="tab" type="button" data-view="productions">Production</button>
+				<nav class="tabs" role="tablist" aria-label="Sections">
+					<button class="tab tab-active" type="button" role="tab" aria-selected="true" data-view="home">Home</button>
+					<button class="tab" type="button" role="tab" aria-selected="false" aria-controls="press" data-view="press">Press</button>
+					<button class="tab" type="button" role="tab" aria-selected="false" aria-controls="productions" data-view="productions">Production</button>
 				</nav>
 				<div class="stage">
 					<div class="image-container">
-						<svg id="logo1" class="image-logo image-logo1" xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 3240 2560" fill="#fff">
+						<svg id="logo1" class="image-logo image-logo1" xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 3240 2560" fill="#fff" role="img" aria-label="Richie Souf">
 							<path d="M1988.68,888.62c-15.76,24.01-27.11,48.54-27.12,77.54l-.06,580.32c0,24.48,10.21,44.57,23.75,65.93l-155.82-.45c-63.75-.18-109.78-47.67-117.55-109.18l-14.93-118.22c-5.01-39.67-22.46-98.6-58.16-96.82l-.17,247.87c-.02,28.92,7.9,55.71,24.68,77.04l-137.9.22c12.16-19.9,23.47-41.82,23.48-67.61l.11-586.9c0-27.69-11.75-51.25-24.93-70.16l124,.86c58.39.41,110.11,31.33,136.16,84.61,53,108.38,19.52,272.21-112.4,300.03,25.88,5.57,50.03,4.97,70.47,18.9,72.03,49.09,34.46,212.56,58.96,285.71,5.54,16.53,31.21,38.64,48.39,25.91,17.69-13.11,22.35-45.37,22.36-68.91l.28-570.12c.01-28.96-8.06-52.82-24.86-76.6h141.24ZM1696.83,947.45c-10.88-23.72-30.18-39.05-58-37.22l-.02,347.95c29.42-3.54,46.76-24.38,58.09-49.34,29.79-65.62,30.23-195.29-.07-261.39Z"/>
 							<path d="M1860.09,1738.81l139.37-.12c-15.69,22.33-26.33,47.03-26.27,75.5l.9,409.3c.14,63.92,36.95,160.89,14.41,247.04-7.34,28.06-22.83,53.96-47.34,69.68-64.95,41.64-147.62,14.9-179.3-55.02-32.96-72.74-26-149.38-62.85-221.78-9.25-18.17-22.36-31.92-43.4-31.47l.63,163.86c.09,24.63,8.61,46.87,23.05,68.48l-134.5-.56c14.51-24.35,22.27-47.12,22.26-75.97l-.19-569.8c-.01-30.42-7.5-55.94-24.77-78.88,47.16.02,93.39-2.77,140.56,1.73,46.88,4.47,84.08,40.03,107.44,79.04,27.32,45.61,34.24,97,35.22,150.05.3,59.23-8.06,117.22-35.23,168.86-22.8,40.85-55.56,67.66-101.7,80.62,189.55,3.93,103.6,274.4,159.52,309.02,42.64,26.4,97.83-.03,113.5-45.79,26.36-76.97,9.37-194.14-67.12-203.86l-33.72-4.29c11.86-14.79,22.04-33.79,22.03-54.88l-.28-412.65c-.02-24.53-9.78-45.07-22.2-68.12ZM1732.16,1874.32c-7.02-52.95-26.37-119.55-76.64-115.39l.07,445.96c20.54-5.02,35.78-18.61,46.29-36.79,41.71-72.14,41.79-207,30.28-293.79Z"/>
 							<path d="M624.82,1738.65c-8.9,18.45-18.94,38.39-15.53,59.03l20.6,124.74,94.82,481.2,51.81-258.24-64.82-323.96c-6.02-30.07-16.73-55.35-35.1-82.41l140.36-.45c-11.69,19.29-20.19,40.82-16.04,63.69l37.8,208.56c14.76-87.32,15.42-185.21,68.85-251.16,21.4-26.41,59.43-39.86,87.98-18.46,46.33,34.74,37.93,158.82,25.34,225.17l-61.7,325.08-33.44,173.15-87.03-.07-52.1-250.52-50.29,251.22-86.86-.2-130.21-650.76c-5.84-29.18-15.21-51.52-32.17-75.65l137.73.02ZM915.98,2403.59l77.45-398.41c9.11-55.47,22.48-154.65-10.93-180.71-23.78-18.54-60.11-3.47-76.13,19.5-45.99,65.94-48.11,173.2-52.68,256.62l62.29,303.01Z"/>
@@ -468,8 +468,8 @@
 							<path d="M1271.23,471.59c-.46,140.82-57.04,301.37-160.6,400.87,22.08-47.24,39.93-90.06,51.02-139.26,14.55-74.08,20.78-145.93,20.74-222.49l-.22-433.58c-.01-26.32-10.78-49.57-24.53-69.59l140.39.07c-15.03,22.8-25.44,46.98-25.53,74.43l-1.27,389.55Z"/>
 						</svg>
 					</div>
-					<div class="panel" id="press"></div>
-					<div class="panel" id="productions"></div>
+					<div class="panel" id="press" role="tabpanel" tabindex="-1" aria-label="Press"></div>
+					<div class="panel" id="productions" role="tabpanel" tabindex="-1" aria-label="Production"></div>
 				</div>
 				<div class="page-footer">
 					<div class="social-icons">
@@ -839,8 +839,18 @@
 					loadProduction();
 				}
 
-				tabs.querySelectorAll('.tab').forEach(tab => tab.classList.toggle('tab-active', tab.dataset.view === view));
-				Object.keys(panels).forEach(name => panels[name].classList.toggle('open', name === view));
+				tabs.querySelectorAll('.tab').forEach(tab => {
+					const active = tab.dataset.view === view;
+
+					tab.classList.toggle('tab-active', active);
+					tab.setAttribute('aria-selected', active);
+				});
+				Object.keys(panels).forEach(name => {
+					const open = name === view;
+
+					panels[name].classList.toggle('open', open);
+					panels[name].tabIndex = open ? 0 : -1;
+				});
 				container.classList.toggle('hidden', view !== 'home');
 			}
 
