@@ -199,6 +199,19 @@
 				text-decoration: none;
 			}
 
+			.notice {
+				margin: 0;
+				padding: 17px 0;
+				font-family: 'Roboto Mono', monospace;
+				font-size: 24px;
+				line-height: 1.5;
+				color: rgba(255, 255, 255, 0.5);
+			}
+
+			.notice a {
+				color: #fff;
+			}
+
 			.row + .row {
 				border-top: 1px solid rgba(255, 255, 255, 0.12);
 			}
@@ -404,6 +417,11 @@
 				#productions {
 					grid-template-columns: 1fr;
 					row-gap: 15px;
+				}
+
+				.notice {
+					font-size: 16px;
+					padding: 27px 0 29px;
 				}
 
 				.row {
@@ -717,6 +735,8 @@
 			let sweeping = 0;
 			let spotify = null;
 			let awaitingApi = false;
+			let waiting = null;
+			let listed = false;
 			let playing = null;
 
 			sizeCanvas();
@@ -785,21 +805,51 @@
 				spotify = api;
 
 				if (awaitingApi) {
-					buildProduction();
+					startProduction();
 				}
 			};
 
 			function loadProduction() {
-				if (panels.productions.children.length) {
+				if (listed) {
 					return;
 				}
 
 				if (!spotify) {
 					awaitingApi = true;
+
+					if (!waiting) {
+						waiting = setTimeout(explainMissingPlayer, 6000);
+					}
+
 					return;
 				}
 
+				startProduction();
+			}
+
+			function startProduction() {
+				clearTimeout(waiting);
+				waiting = null;
+				panels.productions.replaceChildren();
+				listed = true;
 				buildProduction();
+			}
+
+			function explainMissingPlayer() {
+				if (listed || panels.productions.children.length) {
+					return;
+				}
+
+				const notice = document.createElement('p');
+				const link = document.createElement('a');
+
+				link.href = 'https://open.spotify.com/playlist/3wWCLuTQIIE9FTfXc31Ip9';
+				link.target = '_blank';
+				link.rel = 'noopener';
+				link.textContent = 'Open the playlist on Spotify';
+				notice.className = 'notice';
+				notice.append('The Spotify player could not load. ', link);
+				panels.productions.append(notice);
 			}
 
 			function buildProduction() {
