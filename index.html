@@ -275,13 +275,9 @@
 				touch-action: manipulation;
 				width: min(720px, 50vh, 62vw);
 				transform: rotateX(var(--pitch, 0deg)) rotateY(var(--yaw, 0deg)) translateZ(var(--rise, 0px));
-				transition: opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1), transform 900ms cubic-bezier(0.16, 1, 0.3, 1);
+				transition: opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1);
 				transform-style: preserve-3d;
 				will-change: transform;
-			}
-
-			.image-container.tracking {
-				transition: opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1), transform 220ms cubic-bezier(0.22, 1, 0.36, 1);
 			}
 
 			.image-container.hidden {
@@ -399,7 +395,6 @@
 
 			.image-logo .gleam-pool {
 				transform: translate(var(--lx, 1620px), var(--ly, 1280px));
-				transition: transform 260ms cubic-bezier(0.22, 1, 0.36, 1);
 			}
 
 			.tracking .image-logo .mark-body {
@@ -782,6 +777,10 @@
 			let nearby = null;
 			const handheld = window.matchMedia('(max-width: 1279.98px)');
 			let bound = null;
+			let chasing = false;
+			let last = 0;
+			const aim = { yaw: 0, pitch: 0, rise: 0, lx: 1620, ly: 1280 };
+			const shown = { yaw: 0, pitch: 0, rise: 0, lx: 1620, ly: 1280 };
 			const intro = { start: 400, stagger: 60, duration: 2000, fade: 600, flood: 1000, lead: 1375 };
 			let logo;
 			let glyphs = [];
@@ -1112,19 +1111,63 @@
 				const across = Math.max(-0.5, Math.min(0.5, (event.clientX - box.left) / box.width - 0.5));
 				const down = Math.max(-0.5, Math.min(0.5, (event.clientY - box.top) / box.height - 0.5));
 
-				container.style.setProperty('--yaw', (across * 19).toFixed(2) + 'deg');
-				container.style.setProperty('--pitch', (down * -14).toFixed(2) + 'deg');
-				container.style.setProperty('--rise', Math.round(14 - Math.hypot(across, down) * 10) + 'px');
-				logo.style.setProperty('--lx', Math.round(1620 + across * 2900) + 'px');
-				logo.style.setProperty('--ly', Math.round(1280 + down * 2300) + 'px');
+				aim.yaw = across * 19;
+				aim.pitch = down * -14;
+				aim.rise = 14 - Math.hypot(across, down) * 10;
+				aim.lx = 1620 + across * 2900;
+				aim.ly = 1280 + down * 2300;
+				chase();
 			}
 
 			function calm() {
 				hovering = false;
 				container.classList.remove('tracking');
-				container.style.setProperty('--yaw', '0deg');
-				container.style.setProperty('--pitch', '0deg');
-				container.style.setProperty('--rise', '0px');
+				aim.yaw = 0;
+				aim.pitch = 0;
+				aim.rise = 0;
+				aim.lx = 1620;
+				aim.ly = 1280;
+				chase();
+			}
+
+			function chase() {
+				if (chasing) {
+					return;
+				}
+
+				last = 0;
+				chasing = true;
+				requestAnimationFrame(drift);
+			}
+
+			function drift(now) {
+				const step = last ? Math.min(64, now - last) : 16.7;
+				const pull = 1 - Math.pow(1 - (hovering ? 0.13 : 0.06), step / 16.7);
+				last = now;
+				let travelling = false;
+
+				Object.keys(aim).forEach(key => {
+					const gap = aim[key] - shown[key];
+
+					if (Math.abs(gap) > 0.008) {
+						travelling = true;
+					}
+
+					shown[key] += gap * pull;
+				});
+
+				container.style.setProperty('--yaw', shown.yaw.toFixed(3) + 'deg');
+				container.style.setProperty('--pitch', shown.pitch.toFixed(3) + 'deg');
+				container.style.setProperty('--rise', shown.rise.toFixed(2) + 'px');
+				logo.style.setProperty('--lx', shown.lx.toFixed(1) + 'px');
+				logo.style.setProperty('--ly', shown.ly.toFixed(1) + 'px');
+
+				if (travelling || hovering) {
+					requestAnimationFrame(drift);
+					return;
+				}
+
+				chasing = false;
 			}
 
 			function generateRandomPicture() {
