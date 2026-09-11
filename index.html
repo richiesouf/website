@@ -23,7 +23,7 @@
 		<style>
 			body {
 				opacity: 0;
-				animation: reveal 0s linear 9s forwards;
+				animation: reveal 0s linear 3s forwards;
 			}
 
 			body.fade-in {
@@ -685,7 +685,7 @@
 				{ title: 'DJ Holiday, K CAMP - Big Dog', spotify: '21UeVJcfR01QDdfNnvA7MD', color: '#7b441e' },
 				{ title: 'K CAMP, French Montana, iAmTheGENIUS - Money I Made', spotify: '5L3WIRwnLlSy7mgvyDwzcd', color: '#9f0000' }
 			];
-			const players = [];
+			let nearby = null;
 			const handheld = window.matchMedia('(max-width: 768px)');
 			let bound = null;
 			const intro = { start: 400, stagger: 60, duration: 2000, fade: 600, flood: 1000, lead: 1375 };
@@ -781,36 +781,49 @@
 			}
 
 			function buildProduction() {
+				nearby = new IntersectionObserver(entries => {
+					entries.forEach(entry => {
+						if (entry.isIntersecting) {
+							nearby.unobserve(entry.target);
+							mount(entry.target);
+						}
+					});
+				}, { root: panels.productions, rootMargin: '300px 0px' });
+
 				productions.forEach(track => {
 					const cell = document.createElement('div');
-					const host = document.createElement('div');
-					const id = track.spotify.split('/track/').pop().split('?')[0];
 
 					cell.className = 'cell';
 					cell.style.background = track.color;
-					cell.append(host);
+					cell.dataset.uri = 'spotify:track:' + track.spotify.split('/track/').pop().split('?')[0];
+					cell.dataset.title = track.title;
 					panels.productions.append(cell);
+					nearby.observe(cell);
+				});
+			}
 
-					spotify.createController(host, { uri: 'spotify:track:' + id, width: '100%', height: 80 }, controller => {
-						const frame = cell.querySelector('iframe');
+			function mount(cell) {
+				const host = document.createElement('div');
 
-						if (frame) {
-							frame.title = track.title;
+				cell.append(host);
+				spotify.createController(host, { uri: cell.dataset.uri, width: '100%', height: 80 }, controller => {
+					const frame = cell.querySelector('iframe');
+
+					if (frame) {
+						frame.title = cell.dataset.title;
+					}
+
+					cell.classList.add('loaded');
+					controller.addListener('playback_update', event => {
+						if (!event.data || event.data.isPaused || playing === controller) {
+							return;
 						}
 
-						cell.classList.add('loaded');
-						players.push(controller);
-						controller.addListener('playback_update', event => {
-							if (!event.data || event.data.isPaused || playing === controller) {
-								return;
-							}
+						if (playing) {
+							playing.pause();
+						}
 
-							if (playing) {
-								playing.pause();
-							}
-
-							playing = controller;
-						});
+						playing = controller;
 					});
 				});
 			}
@@ -837,19 +850,27 @@
 				bindLogo();
 			}
 
-			window.onload = () => {
-				logo = generateRandomPicture(logos);
-				if (document.hidden) {
-					document.addEventListener('visibilitychange', function onShow() {
-						if (!document.hidden) {
-							document.removeEventListener('visibilitychange', onShow);
-							startFade();
-						}
-					});
-				} else {
+			if (document.readyState === 'loading') {
+				document.addEventListener('DOMContentLoaded', begin);
+			} else {
+				begin();
+			}
+
+			function begin() {
+				logo = generateRandomPicture();
+
+				if (!document.hidden) {
 					startFade();
+					return;
 				}
-			};
+
+				document.addEventListener('visibilitychange', function onShow() {
+					if (!document.hidden) {
+						document.removeEventListener('visibilitychange', onShow);
+						startFade();
+					}
+				});
+			}
 
 			function startFade() {
 				if (parseFloat(getComputedStyle(document.body).opacity) < 1) {
@@ -979,7 +1000,7 @@
 				return glyphs.map(glyph => glyph.path.getAnimations().find(animation => animation.animationName === 'lift')).filter(Boolean);
 			}
 
-			function generateRandomPicture(array) {
+			function generateRandomPicture() {
 				let randomNum = Math.floor(Math.random() * logos.length);
 				logos[randomNum].style.display = "block";
 				return logos[randomNum];
