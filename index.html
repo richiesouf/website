@@ -800,6 +800,7 @@
 				if (event.pointerType !== 'mouse') {
 					clearTimeout(release);
 					pressed = performance.now();
+					container.setPointerCapture(event.pointerId);
 					ripple(event);
 				}
 			});
@@ -1124,11 +1125,12 @@
 					return;
 				}
 
-				const box = container.getBoundingClientRect();
+				const frame = container.parentElement.getBoundingClientRect();
+				const box = { width: container.offsetWidth, height: container.offsetHeight };
 				const touch = !where.mouse;
 				const reach = offset => touch ? Math.sign(offset) * Math.pow(Math.abs(offset) * 2, 0.6) / 2 : offset;
-				const across = reach(Math.max(-0.5, Math.min(0.5, (event.clientX - box.left) / box.width - 0.5)));
-				const down = reach(Math.max(-0.5, Math.min(0.5, (event.clientY - box.top) / box.height - 0.5)));
+				const across = reach(Math.max(-0.5, Math.min(0.5, (event.clientX - frame.left - frame.width / 2) / box.width)));
+				const down = reach(Math.max(-0.5, Math.min(0.5, (event.clientY - frame.top - frame.height / 2) / box.height)));
 
 				aim.yaw = across * (touch ? 34 : 19);
 				aim.pitch = down * (touch ? -26 : -14);
