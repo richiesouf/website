@@ -807,7 +807,7 @@
 				container.addEventListener(type, event => {
 					if (event.pointerType !== 'mouse') {
 						clearTimeout(release);
-						release = setTimeout(calm, Math.max(0, 520 - (performance.now() - pressed)));
+						release = setTimeout(calm, Math.max(0, 700 -(performance.now() - pressed)));
 					}
 				});
 			});
@@ -1125,11 +1125,13 @@
 				}
 
 				const box = container.getBoundingClientRect();
-				const across = Math.max(-0.5, Math.min(0.5, (event.clientX - box.left) / box.width - 0.5));
-				const down = Math.max(-0.5, Math.min(0.5, (event.clientY - box.top) / box.height - 0.5));
+				const touch = !where.mouse;
+				const reach = offset => touch ? Math.sign(offset) * Math.pow(Math.abs(offset) * 2, 0.6) / 2 : offset;
+				const across = reach(Math.max(-0.5, Math.min(0.5, (event.clientX - box.left) / box.width - 0.5)));
+				const down = reach(Math.max(-0.5, Math.min(0.5, (event.clientY - box.top) / box.height - 0.5)));
 
-				aim.yaw = across * 19;
-				aim.pitch = down * -14;
+				aim.yaw = across * (touch ? 34 : 19);
+				aim.pitch = down * (touch ? -26 : -14);
 				aim.rise = (14 - Math.hypot(across, down) * 10) * box.width / 720;
 				aim.lx = 1620 + across * 2900;
 				aim.ly = 1280 + down * 2300;
