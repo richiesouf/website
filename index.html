@@ -256,7 +256,7 @@
 			}
 
 			.stage {
-				perspective: 1500px;
+				perspective: calc(min(720px, 50vh, 62vw) * 2.08);
 				position: absolute;
 				top: clamp(72px, 10.8vh, 156px);
 				bottom: clamp(80px, 11.8vh, 170px);
@@ -272,7 +272,7 @@
 				-webkit-tap-highlight-color: transparent;
 				-webkit-user-select: none;
 				user-select: none;
-				touch-action: manipulation;
+				touch-action: none;
 				width: min(720px, 50vh, 62vw);
 				transform: rotateX(var(--pitch, 0deg)) rotateY(var(--yaw, 0deg)) translateZ(var(--rise, 0px));
 				transition: opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1);
@@ -459,6 +459,8 @@
 					top: calc(100svh * 0.12);
 					bottom: calc(100vh * 0.12);
 					bottom: calc(100svh * 0.12);
+					perspective: calc(min(calc(100vh * 0.37), 84vw) * 2.08);
+					perspective: calc(min(calc(100svh * 0.37), 84vw) * 2.08);
 				}
 
 				.image-container,
@@ -774,6 +776,8 @@
 			let glyphs = [];
 			let current = 'home';
 			let hovering = false;
+			let pressed = 0;
+			let release = null;
 			let spotify = null;
 			let awaitingApi = false;
 			let waiting = null;
@@ -793,13 +797,16 @@
 			});
 			container.addEventListener('pointerdown', event => {
 				if (event.pointerType !== 'mouse') {
+					clearTimeout(release);
+					pressed = performance.now();
 					ripple(event);
 				}
 			});
 			['pointerup', 'pointercancel'].forEach(type => {
 				container.addEventListener(type, event => {
 					if (event.pointerType !== 'mouse') {
-						calm();
+						clearTimeout(release);
+						release = setTimeout(calm, Math.max(0, 520 - (performance.now() - pressed)));
 					}
 				});
 			});
@@ -1105,7 +1112,7 @@
 
 				aim.yaw = across * 19;
 				aim.pitch = down * -14;
-				aim.rise = 14 - Math.hypot(across, down) * 10;
+				aim.rise = (14 - Math.hypot(across, down) * 10) * box.width / 720;
 				aim.lx = 1620 + across * 2900;
 				aim.ly = 1280 + down * 2300;
 				chase();
