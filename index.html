@@ -776,6 +776,7 @@
 			let glyphs = [];
 			let current = 'home';
 			let hovering = false;
+			let lit = false;
 			let pressed = 0;
 			let release = null;
 			let spotify = null;
@@ -1044,6 +1045,11 @@
 				footer.classList.add('shown');
 				tabs.classList.add('shown');
 				logo.classList.add('drawing');
+				logo.addEventListener('animationstart', event => {
+					if (event.animationName === 'flood') {
+						light();
+					}
+				});
 				logo.addEventListener('animationend', event => {
 					if (event.animationName === 'flood') {
 						settle();
@@ -1078,19 +1084,31 @@
 				logo.classList.add('settled');
 
 				loadProduction();
+				light();
+			}
 
-				if (where && where.mouse && container.matches(':hover')) {
+			function light() {
+				if (lit) {
+					return;
+				}
+
+				lit = true;
+
+				if (hovering) {
+					aim.glow = 1;
+					chase();
+				} else if (where && where.mouse && container.matches(':hover')) {
 					ripple(where);
 				}
 			}
 
 			function ripple(event) {
-				if (!logo || !logo.classList.contains('settled')) {
+				if (!logo || !glyphs.length) {
 					return;
 				}
 
 				hovering = true;
-				aim.glow = 1;
+				aim.glow = lit ? 1 : 0;
 				track(event);
 				chase();
 			}
