@@ -804,6 +804,13 @@
 					ripple(event);
 				}
 			});
+			['touchstart', 'touchmove'].forEach(type => {
+				document.addEventListener(type, event => {
+					if (container.contains(event.target)) {
+						event.preventDefault();
+					}
+				}, { passive: false });
+			});
 			['pointerup', 'pointercancel'].forEach(type => {
 				container.addEventListener(type, event => {
 					if (event.pointerType !== 'mouse') {
