@@ -764,8 +764,6 @@
 				{ title: 'K CAMP, French Montana, iAmTheGENIUS - Money I Made', spotify: '5L3WIRwnLlSy7mgvyDwzcd', color: '#9f0000' }
 			];
 			let nearby = null;
-			const handheld = window.matchMedia('(max-width: 1279.98px)');
-			let bound = null;
 			let chasing = false;
 			let last = 0;
 			let where = null;
@@ -782,8 +780,29 @@
 			let listed = false;
 			let playing = null;
 
-			bindLogo();
-			window.addEventListener('resize', bindLogo);
+			container.addEventListener('pointermove', track);
+			container.addEventListener('pointerenter', event => {
+				if (event.pointerType === 'mouse') {
+					ripple(event);
+				}
+			});
+			container.addEventListener('pointerleave', event => {
+				if (event.pointerType === 'mouse') {
+					calm();
+				}
+			});
+			container.addEventListener('pointerdown', event => {
+				if (event.pointerType !== 'mouse') {
+					ripple(event);
+				}
+			});
+			['pointerup', 'pointercancel'].forEach(type => {
+				container.addEventListener(type, event => {
+					if (event.pointerType !== 'mouse') {
+						calm();
+					}
+				});
+			});
 
 			renderRows(panels.press, press, item => item.outlet + ', ' + item.year);
 			tabs.addEventListener('click', event => {
@@ -816,34 +835,6 @@
 				show(all[next].dataset.view);
 				all[next].focus();
 			});
-
-			bindLogo();
-			handheld.addEventListener('change', bindLogo);
-
-			function bindLogo() {
-				if (handheld.matches === bound) {
-					return;
-				}
-
-				bound = handheld.matches;
-				calm();
-				container.removeEventListener('pointerenter', ripple);
-				container.removeEventListener('pointerdown', ripple);
-				container.removeEventListener('pointermove', track);
-				container.removeEventListener('pointerleave', calm);
-				container.removeEventListener('pointerup', calm);
-				container.removeEventListener('pointercancel', calm);
-				container.addEventListener('pointermove', track);
-
-				if (handheld.matches) {
-					container.addEventListener('pointerdown', ripple);
-					container.addEventListener('pointerup', calm);
-					container.addEventListener('pointercancel', calm);
-				} else {
-					container.addEventListener('pointerenter', ripple);
-					container.addEventListener('pointerleave', calm);
-				}
-			}
 
 			function renderRows(panel, items, meta) {
 				items.forEach(item => {
@@ -1081,7 +1072,7 @@
 
 				loadProduction();
 
-				if (!handheld.matches && container.matches(':hover')) {
+				if (where && where.mouse && container.matches(':hover')) {
 					ripple(where);
 				}
 			}
@@ -1102,7 +1093,7 @@
 					return;
 				}
 
-				where = { clientX: event.clientX, clientY: event.clientY };
+				where = { clientX: event.clientX, clientY: event.clientY, mouse: event.pointerType === 'mouse' };
 
 				if (!hovering) {
 					return;
