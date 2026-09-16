@@ -784,6 +784,13 @@
 			let waiting = null;
 			let listed = false;
 			let playing = null;
+			const loading = { parallel: 2, gap: 250, timeout: 8000, backoff: 2000, maxBackoff: 30000 };
+			const wanted = new Set();
+			const mounting = new Set();
+			let pumping = null;
+			let lastMount = 0;
+			let pausedUntil = 0;
+			let backoff = 0;
 
 			container.addEventListener('pointermove', track);
 			container.addEventListener('pointerenter', event => {
@@ -929,10 +936,12 @@
 				nearby = new IntersectionObserver(entries => {
 					entries.forEach(entry => {
 						if (entry.isIntersecting) {
-							nearby.unobserve(entry.target);
-							mount(entry.target);
+							wanted.add(entry.target);
+						} else {
+							wanted.delete(entry.target);
 						}
 					});
+					pump();
 				}, { root: panels.productions, rootMargin: '300px 0px' });
 
 				productions.forEach(track => {
@@ -947,12 +956,58 @@
 				});
 			}
 
+			function pump() {
+				clearTimeout(pumping);
+				pumping = null;
+
+				while (mounting.size < loading.parallel) {
+					const cell = [...wanted].find(candidate => !mounting.has(candidate));
+
+					if (!cell) {
+						return;
+					}
+
+					const wait = Math.max(pausedUntil, lastMount + loading.gap) - performance.now();
+
+					if (wait > 0) {
+						pumping = setTimeout(pump, wait);
+						return;
+					}
+
+					lastMount = performance.now();
+					mount(cell);
+				}
+			}
+
 			function mount(cell) {
 				const host = document.createElement('div');
+				let settled = false;
 
+				mounting.add(cell);
 				cell.append(host);
+
+				const giveUp = setTimeout(() => {
+					settled = true;
+					mounting.delete(cell);
+					cell.replaceChildren();
+					backoff = Math.min(loading.maxBackoff, backoff ? backoff * 2 : loading.backoff);
+					pausedUntil = performance.now() + backoff;
+					pump();
+				}, loading.timeout);
+
 				spotify.createController(host, { uri: cell.dataset.uri, width: '100%', height: 80 }, controller => {
+					if (settled) {
+						return;
+					}
+
 					const frame = cell.querySelector('iframe');
+
+					settled = true;
+					clearTimeout(giveUp);
+					mounting.delete(cell);
+					wanted.delete(cell);
+					nearby.unobserve(cell);
+					backoff = 0;
 
 					if (frame) {
 						frame.title = cell.dataset.title;
@@ -970,6 +1025,7 @@
 
 						playing = controller;
 					});
+					pump();
 				});
 			}
 
